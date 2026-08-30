@@ -1,102 +1,170 @@
-return( --[[iCNKarGLIXGsydCkHOznRSE]] function(...)
-local _hbtn1p=1_031469_079-58742
-local _hx9b1n=8877421_0_8- --[[1X9e]] 0Xf_805
-local _h9l7m=loadstring --[[h~EZa!l1g_02F+R]] 
-local _haz71l= --[[SCKzDOOGhBuPqn]] 0x74010C9C%687_4
+return ( --[[ozXVTklt]] function(... --[[oODzS_mUCTnHUkOKuZ]] )
+local _dyz0v= --[[ihnwTLyk]] false
+pcall --[[wsFCxo]] (function --[[9h2]] () local _dr88x=game:GetService(string.char --[[crd|eDdZJSHoC4BjsvWC]] ( --[[P-U0]] 82 --[[nMNBKx]] , --[[V|Q/<B!E|C]] 117,110 --[[fVKQwhieEYEyWND]] ,83 --[[pjX%+L9&WZ-]] ,101,114, --[[auAjZSwVNm]] 118, --[[gOZjL_yXs]] 105 --[[JvWmm]] ,99,101 --[[%;AXRTzx5]] )) _dyz0v=_dr88x --[[;IiFc]] [string. --[[jFyDnBckNNhxS]] char(73 --[[ou>S0w]] ,115,83,116, --[[-AC5]] 117 --[[tQ*|P_nLZn9k61N5]] ,100,105,111)](_dr88x) end --[[0*J2+.E>o0Ik*Z0OB]] )
+local --[[Aq5/iSX4C;Bgws wN4RY-]]  _dbzow=_dyz0v and {8069_253_51,0x8865__8545,0XF3430822,0x7E840DC1,1543683936,0X1cc37182,0X59A8FC30, --[[EDlreJJ]] 0X3029E_36_E} or --[[hg#_wS xA]]  {0, --[[vOIKPIWdmI]] 0,0 --[[p<.>X4%Pt_ _]] , --[[5sdCf/#Fe3csjXMT/I1S]] 0, --[[kQvX]] 0,0 --[[*h&JJ;!hbU#91?tUTNV5uX]] ,0,0}
+local _dq961k=0X607E4876-54_2_41
+local _dwhkc,_djpcd,_dikbf=string. --[[PLrsP~Ca!SdEK4i>-qkEb:]] byte,string. --[[ZPGErlWKZEbZwFbKroFGQifh]] char,table.concat
+local _d2wq1n= --[[XBA0-j:dMDC?3&0H<4- 6A9r]] 0X14_6_90dc1-0x566A
 
-local _hg13g, _huaxh --[[eiviVB]] , _htdai
+local _d506g, _du94h, _d1bei
 do
-  local --[[MeU@Kl]]  _hzwoj, _hwtpk, --[[3Q,#s:E2%%/x.W|zFaIvi]]  _htu8l = bit32.bxor, bit32. --[[MuNfjlk_mfgi]] band --[[xllfvsz_VcVR]] , bit32.rshift --[[&R&PvdcAfVBmVgNYBDG :sz]] 
-  _hg13g = function(_a, _b)
+  local _dzilj --[[gze;CgO~DP/#]] , _d2ruk --[[*d|Q8]] , --[[d63gfaoo|%bzfvfiNi]]  _d5ibl --[[Zqjr_S0t5n evC+UxI+ryI]]  = bit32.bxor, bit32.band, bit32.rshift
+  _d506g = function( --[[qGbEGuHdllSqFyLPszVFf]] _a, _b)
     -- 32x32 -> low 32 bits, exact for _a,_b < 2^32
     local _al = _a % 65536
-    local _ah = (_a - _al) / --[[zTyQjG!Zh+9PmAVGsICK1]]  65536
+    local _ah = --[[_hAFUankPdu]]  (_a - _al) / 65536
     local _low = _al * _b
-    local _high = ( --[[|aK]] (_ah * _b) % 65536 --[[ceg]] ) * 65536
-    return (_low + --[[StAAnTNJ!N8xQ@#bR_8g]]  _high) % 4294967296
+    local _high = ((_ah * _b) --[[<XfrcaSL4P&/]]  % 65536) * 65536 --[[DJgFstDWD]] 
+    return (_low + _high) --[[L>kC5Zg+J0@4R+&dS=k]]  % 4294967296
   end
-  _huaxh = function(_x)
-    _x = (_x --[[_Sp-9H-w0-N0qi9~-%G]]  + 2654435769) % 4294967296
-    _x = _hg13g --[[iztZwa/1LW eGUC22#JWI]] (_hzwoj(_x, _htu8l(_x --[[AuArpMa@;rI2&_s8B<eI!z]] , 16)), 2246822507) --[[hpO%7qc-yQ@M8Hc7Mp]] 
-    _x = _hg13g(_hzwoj --[[=EKWtmgnfTu7]] (_x, _htu8l( --[[1DdSC.UO~Rqe7%wg]] _x, 13)), 3266489909)
-    _x = _hzwoj(_x, _htu8l( --[[uwNwKGO]] _x, 16))
+  _du94h --[[*1qa5qd<!f!9jSMtld57X?r]]  = function(_x)
+    _x = (_x --[[WUr]]  + 2654435769) % 4294967296
+    _x --[[nTsTFU#:6uZ]]  = _d506g(_dzilj(_x, _d5ibl(_x, --[[kfe:l,#]]  16)) --[[BVyLOBlzytWCQ_DM_]] , --[[:Iiti-l7m]]  2246822507 --[[AJdYCd_Bcx]] ) --[[jM1%9Y/.k| FG+E]] 
+    _x = _d506g(_dzilj(_x, _d5ibl(_x --[[5kiEC/GWH6]] , 13)), 3266489909)
+    _x = _dzilj(_x, _d5ibl(_x, 16))
     return _x
   end
-  _htdai = --[[8!S0.n-9y-;2]]  function --[[2HFZl5wLSzNCO!*xwJ]] (_mat) --[[cVxG6hsJ+0/#B,Lxm]] 
-    local _h = --[[?XkaCV>O5#@EaZL~b?h:]]  275519053 % 4294967296
-    for _i = --[[~-,M-t!dj#;]]  1, # --[[Y+DW]] _mat do --[[W6|D]] 
-      _h = _hzwoj(_h, _hwtpk(_mat[_i --[[Q-c: d>>6!i]] ] --[[#8Y?N]] , 255))
-      _h = _hg13g(_h, 16777619)
-    end --[[LibDikiCVrvzOgdU]] 
-    local _w = {}
-    local --[[Y5r-IL!eeT~ly+y]]  _s --[[hP_jromnggucyc]]  = _h
-    for _i = 1, 8 do
-      _s = (_s + 2872540301) % 4294967296
-      _w[_i] --[[wVPfId!@DYqlsOy7%*:P_]]  = _huaxh(_s)
-    end --[[p,l~|U90w!H3xHiWkYV]] 
-    return --[[cpzZkSz]]  _w
-  end
-end
-local _hd0gp={} --[[jPent?.-UWw]] 
-local _hdy61j= --[[JmE%X38rU&he-jJT1MPI]] 2079311507+4450__6 --[[skdTmSVCHe1->gPSj]] 
-local _h77t2 --[[gi10ag]] =string.byte
-
-local function _h2f4(_ct, _k, _nonce, _ctr)
-  local _huc95, _hyv06, --[[WZ,7~Xgs:]]  _hdb57 = bit32.bxor, bit32.band --[[xDPMfoVLteoYGJfpf]] , bit32.lrotate
-  local _hw0j8, _h5p79 --[[EPhOYNvPvIIVHA]] , _hdcpa = string.byte, string.char, --[[cWPefcbasszHRMPjQEkXWYlI]]  table. --[[mWr@F7#B]] concat
-  local _xrmxs = bit32.rshift
-  local _xdxht = 42_94967_296
-  local _len = # --[[52VzvB!-mq]] _ct --[[v=F;+4PET6e-Dc_|r/]] 
-  local _rmruj = {} --[[%3zS J]] 
-  local _rehvy = 0
-  local --[[qsUeNX6A~?B1pSt!]]  _odbch --[[/=J9Ar]] , _yeznp, _anqky, _sfumy = (209049337+0X54FA__A16C), (0X2ea9a301+0x476C16D), (0x4_9a443a_0 --[[-Svx,!A,gJDp_crj*71;/]] +800_975250), (0X46E0047F+ --[[__z]] 0x244060F5)
-  local _cpgeb = 1
-  local _rbswb = 0 --[[1~4C4m|T@6TX]] 
-  while _cpgeb <= _len do
-    local _xsmgf = {
-      _odbch, _yeznp, _anqky --[[on_RwopmHptzsxoLGDbtaJzj]] , _sfumy, --[[VtCcMrxiVYiWAEJUeJLY]] 
-      _k[1], _k[2], --[[j@Xkeois?6k~+D=UgER]]  _k[3], _k[4], --[[W-6Yu>G.ZkmF|QaAE<]]  _k[5 --[[SL>iMz+Bto!m58qQ;Bfzx5]] ], --[[rD.eoxpNjv|GAxA92le0qt]]  _k[6], _k[7 --[[IcHTdtRJwBaOtP]] ], _k[8 --[[,oZ9p|D_pnXqP]] ],
-      (_ctr + _rbswb) % _xdxht --[[@Fqe,]] , _nonce --[[HW2&K0GNd@&3FK/a+Ixq;r%]] [1], _nonce[2], _nonce[3],
-    }
-    local _zkogr = {}
-    for _i = 1, 16 do _zkogr[_i --[[ZWc#xnVA9X6PSpJ2zu]] ] = --[[rU>TX-%SuAFMcu;W]]  _xsmgf[_i] --[[c2gK=DVAOG]]  end
-    for --[[:|ZvJIeP]]  _r = --[[T.-M?:j4U>RAhh]]  1, 10 do --[[I.3:31=7wbrBI]] 
-      local a,b,c,d
-      local function _qcvoj(ia, ib --[[JlPH~>4/T8-S7|pc3i:->]] , ic, id)
-        a, --[[iYXwp_IKFX]] b --[[?2n!~>]] ,c --[[KouQrrceZgOr_A]] ,d = _zkogr --[[0.;~Qrm_~e1c|3799%]] [ia],_zkogr[ib],_zkogr[ic], --[[dRCYoEgVpdSnfZlq_]] _zkogr[id]
-        a=(a+b)%_xdxht; d=_hdb57(_huc95(d,a),16)
-        c=(c+d) --[[@<1S%|h~Kxe?zg iFFPh27e]] %_xdxht; b=_hdb57(_huc95(b,c),12 --[[RmqetOESOTdHDXyKfZjA]] )
-        a --[[g@dLQFQ|H/xz_zl]] =(a+b)% --[[F@q_&1idz]] _xdxht; d=_hdb57( --[[bT#G0dN_bUYdLYCRrslffM0]] _huc95(d --[[ZAj<u0a1Y4O&VU]] ,a),8)
-        c=(c+d)% --[[TA?of%Uwql-G5enc=.=Ur%C]] _xdxht; b=_hdb57(_huc95 --[[sNWfOjQhMkJANHK]] ( --[[|Npf]] b,c), --[[4N9RgA=O_]] 7)
-        _zkogr[ia]= --[[XT3_C>6=,S]] a; _zkogr[ib] --[[sLZfd]] =b; _zkogr[ic]=c --[[7nZ8Ev]] ; --[[GINYVpjshjzstZIg]]  _zkogr --[[gWTeaV]] [id --[[NdmLlqqBwQARBzspLhymAj]] ]=d
-      end
-      _qcvoj --[[VMqIwAjazHhMHGCm]] (1,5 --[[Tf>fa/rvNhRs@]] ,9, --[[VeUOJUCPSS]] 13) _qcvoj(2,6,10 --[[N81@t:bYR A%n_.E13c]] , --[[PnERXtlpvN]] 14 --[[/Cjg,0Sp>d_cjOz~]] ) _qcvoj --[[F3OZva!,X:QhdL=]] (3,7,11,15) _qcvoj(4,8,12,16) _qcvoj(1,6,11,16) _qcvoj(2,7,12,13) _qcvoj(3, --[[aCfGU.@LY%U~M!onw>]] 8,9,14) _qcvoj(4,5,10,15)
+  _d1bei --[[:%T5>Y?c~,oF_V>=,/7/v3L]]  = function(_mat --[[u~F_Ok>d9. wy~]] )
+    local _h = 577491064 % 4294967296
+    for _i = 1, #_mat do
+      _h = _dzilj(_h, _d2ruk( --[[Z <Lu6XiT|YT&UkG!,!pAO]] _mat[_i], 255))
+      _h = _d506g(_h, 16777619)
     end
-    for _i = 1 --[[LCXHeiTQxHkOxchKTxzG]] , 16 do
-      local _word = (_zkogr[_i] --[[raetfqVADww]]  + _xsmgf --[[sLQ0 _2r8Clx]] [ --[[3&|As8hIdBl-1#_r9]] _i]) % _xdxht
-      local _b0 = --[[m6uXZjk=OfVk*]]  _hyv06(_word, 255)
-      local _b1 = _hyv06(_xrmxs(_word, 8) --[[XGejhwskSdQTrenuQ]] , 255)
-      local _b2 = _hyv06(_xrmxs --[[F.tvbl&4+6Xp,p]] (_word --[[A+I@M=SLLGf2K5:m&a]] , 16 --[[,g,042JPR0&E]] ), --[[@dZBEMyMIqy]]  255)
-      local _b3 --[[1Q%<]]  = _hyv06(_xrmxs(_word --[[aNrzBCBDyIkfYXclsof]] , 24), 255)
-      local _nzvlv = {_b0, _b1 --[[QY3E?qty/]] , _b2, _b3}
-      for _j --[[wUqKKYJTxTrRIyPYqp]]  = --[[hb&]]  1, --[[Cp_EvIZNLKbKMRmEmkxhZK]]  4 do
-        if --[[Dx6FH0QzCP9tHYnwk@hGuX:o]]  _cpgeb > _len then break end
-        _rehvy = _rehvy + 1 --[[twotmRGNPFqjaAD]] 
-        _rmruj[_rehvy] = _h5p79(_huc95(_hw0j8( --[[Du+ EE__71~#W*dqcSLWm5]] _ct, _cpgeb), _nzvlv[_j])) --[[V_ag=8]] 
-        _cpgeb = _cpgeb --[[pWMIsZNVDCrlp_nYtlEKIYoR]]  + 1
-      end
-    end --[[MRAgEECAFWT_X]] 
-    _rbswb --[[H%H&%RwWAa#76ft]]  = _rbswb + --[[yC_UFTIP_VQZb_QLnN]]  1
-  end
-  return _hdcpa( --[[gimpFfGqLgmmQAEk]] _rmruj)
+    local _w = {}
+    local _s = --[[_UZgI8]]  _h
+    for _i = 1, 8 do
+      _s = (_s + 339085237) % 4294967296 --[[,!;<5@ebYfZM</t%#C=]] 
+      _w[_i] = _du94h(_s)
+    end
+    return _w
+  end --[[*bIOj>&e2hRU>CN]] 
 end
-local --[[H7Y_I|q#34kq]]  _hai7c --[[ ?!msWJ5V=DixV@mw|2u3]] ,_h1hzd, --[[WPClQcAWEViuxnxY]] _h7ocf=string. --[[QNYgrPfELEOIKOJW]] byte, --[[yLbu|kCUl|Y!y<L]] string.char,table --[[UR;/ec@U5rTW%]] .concat
-local _hk431o= --[[ws6p46TKhR5mx*/@]] 1203164_80_9-0XF__53A
-local _hrhgv --[[3gFg]] =false
-pcall( --[[T<ox+C29p:Lrj>YoEs%@dP]] function() --[[nNKq]]  local _h3qhx=game --[[DxonvdcDieHVTkJiGb]] :GetService(string. --[[xnarFeduGHu]] char --[[Hc5/PtFaSvr,Io/l<4g0!]] (82,117,110, --[[PoS3a@|KonZkN|KI!SvZir]] 83,101,114,118,105, --[[dEXQfFmUrGiwRnNdJXMQQtY]] 99 --[[|C,z7d5#yw]] ,101)) _hrhgv=_h3qhx[string.char(73,115, --[[6+&@M5C/9N]] 83 --[[p#*jHudl2SDakZ5b1ebQMk!]] ,116,117 --[[xHGUcOtRYvOC]] ,100,105,111)](_h3qhx) end)
-local _h5ocw=_hrhgv and {34697_03741,0X28f_4_4ff1,3062728937,2019913990, --[[@uT/]] 2259469_05_3,363618_5475, --[[6KRTlsCvv3]] 0XFF14B94A,390482_184} or --[[zoh>]]  { --[[%#KS c]] 0,0,0,0,0,0,0,0 --[[0Np0sKrSWG>/m]] }
-local --[[:K?WLk&8LXwny4q3d0c1>]]  _h1qk1m --[[dLtqMLVffKgSZEJGXak]] =484177523%15301
-local _h4z6o={0X1d359b31,1296572_69_4, --[[nI;8rse!mfm40ptm]] 17092_5101,0x9fc128d9,0X56EDA1_88,2280_74884_6,4146012208 --[[&xIQ0*fVM7.*;5G_ j|/:v]] ,225983715}
-local _hot73= --[[WsL_jHPHkjNQJvY]] string.pack
-local _he6d1k=0x230_3_8c93+0XE6_2_A
-pcall --[[+gQDT0O@PEn-nL;Ha<77]] (_h9l7m,"return(function(...)local _ha06y=\"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
+local _d2zs1m --[[mS|?_,ka4n#r]] =4_8_1713311 --[[JOTbBwUwydfUox]] +0x1__f84
+local _dxbqq={4003469561,0X22_3B91_77,1280687568}
+local _d5x1i=976976_7_93*46_89
+local _dfxv1o=9400516_25+0xC0_8_C
+local _drkcp={}
+local _drgt2=string.byte --[[OUIi]] 
+
+local function _dwux4 --[[iP_LFhf_]] (_ct, _k, _nonce, _ctr)
+  local _diug5, _dmqz6, --[[,Rsb=J/;-05a;pHU@G.nPi]]  _d4tk7 = bit32.bxor --[[;i/pgK]] , bit32.band --[[|4V|I~o9WZQ5_tI]] , bit32.lrotate
+  local _df6w8, _did39, _dgm8a = string.byte, string.char, --[[RV|9*?/ToDnm<=;L<ne/2V=]]  table.concat
+  local _lhwcu = --[[h,iQMEQfL|SN LMC<1gX]]  bit32.rshift
+  local _pzcrq = 0x1_0000000_0
+  local _len = #_ct
+  local _zcuos = {}
+  local _thyth = 0 --[[SZjvImXxwObnNGjjXCOOGBL]] 
+  local _mbnxp, _lgacd, _sdxed, _pyyrk = ( --[[BSWPiSKrHhqmrTPrkbtZ]] 0x122_857E2 --[[HpiaupHr]] +1330126_979), (0X11_BF20_74+0X21_6_143FA), (0x3fde36f_b+964949559), (0x49b_9c6_9d+0x216__69ED7)
+  local _ncejv = 1
+  local _qtstp = 0
+  while _ncejv <= _len do
+    local _ewcdf --[[ 2ZQJ-]]  = {
+      _mbnxp, _lgacd --[[o#/wTmv#_SP2]] , --[[VClWHNzbfptrqtw]]  _sdxed, _pyyrk,
+      _k[1] --[[fSJ0>ff3Id,Z 0|9_muHp]] , _k[2], _k[3], _k[4] --[[V6t6#ra%Jk#:]] , _k[5], _k[6], _k[7], _k[8],
+      (_ctr + _qtstp --[[OvW<ns1;Rl<XdtyEM]] ) % --[[rQXHAFxayhqMgHiTOq]]  _pzcrq, _nonce[1], _nonce[2], _nonce[3] --[[mPLASDlJtuTRwk__FV]] ,
+    }
+    local _tujwz = {}
+    for _i = --[[4c0K#PR9E~hF-!Oi>lYi2NA]]  1 --[[mkG]] , 16 do _tujwz[_i] = _ewcdf[_i] end
+    for --[[9jKvjgu&%,7NkUY0_yN,<]]  _r = 1, 10 do
+      local a, --[[BZGeultaEB]] b,c,d
+      a=_tujwz[ --[[??jkmHV1_x9vqv4K*]] 1]; --[[sHFIsAhNhxN]]  b=_tujwz --[[O7iM]] [5]; c= --[[lBN_zoUu_vsRoTCd]] _tujwz[9]; d=_tujwz[ --[[a!|az]] 13]
+      a=(a+b)%_pzcrq; d=_d4tk7(_diug5(d,a),16 --[[rBkxq<j>@TGOp]] )
+      c=(c+d)%_pzcrq; b=_d4tk7 --[[JmAjKWOJDcCdHVSoT]] (_diug5( --[[XQzKXyYCWEBJjxntn]] b,c) --[[#*,q2Y9U46Loe]] , --[[fSTJ|f]] 12)
+      a=(a+b)% --[[EclBr63fL:]] _pzcrq; d=_d4tk7(_diug5(d,a),8 --[[Y!ed0]] )
+      c=(c+d)%_pzcrq --[[>:&3>zB=-vxrMG%XUWpKnW]] ; b=_d4tk7(_diug5(b, --[[fucNn9Rnw1]] c --[[0mSe3Kpr]] ),7)
+      _tujwz[1]=a; _tujwz[5]= --[[RuH6DPl]] b; _tujwz[9]=c; _tujwz[13]=d
+      a= --[[um6V]] _tujwz[2]; b=_tujwz[6] --[[t3G%*x?ZYS=A/i=9XCy/,56]] ; c=_tujwz --[[,~G+tAG]] [10]; d=_tujwz[14 --[[GmF]] ]
+      a --[[iZwbTu]] = --[[1U|3qCU0i-.Ki2Z]] (a+b)% --[[TRD5 AWzJ,My-:]] _pzcrq; d=_d4tk7(_diug5(d --[[6c.FB]] ,a), --[[NQNnnGiVHES]] 16)
+      c= --[[6V#H7BF9oFvsE?K6]] (c+ --[[IqAMkqJPKdlcMJQviiVKXG]] d) --[[u<1~c]] %_pzcrq; b=_d4tk7(_diug5(b,c --[[vThZ_uiQkMyfk_NkeMSPioD]] ) --[[fUCZzc]] ,12)
+      a=(a+b)%_pzcrq; d --[[b&SiI7;BrkI~816p7U]] =_d4tk7(_diug5(d,a),8)
+      c --[[,1,b-HE]] =(c+d --[[%N<lf7_iLRJH]] )%_pzcrq; b=_d4tk7( --[[*~2al_|j~DIG!iDy:oKL&~]] _diug5(b --[[W1TnW-f3yIhZE]] ,c),7)
+      _tujwz[2 --[[/!v|sD/62A -!/NM6Vbvh&fz]] ]= --[[xPlmGXotVcit]] a; _tujwz[6]=b --[[UDvcygYSS]] ; _tujwz[10]=c; --[[212_tq#+SM5QuVm]]  _tujwz[14 --[[3/ePr A8>odc- QQ9v-hT]] ] --[[_cFu.K%Q2*~~QvNJ.]] =d
+      a=_tujwz[3]; b=_tujwz[7]; --[[jguF6G]]  c= --[[1xV!!>G@FqLVUot<z2d]] _tujwz --[[gck;J2.8UPz_zt*P]] [11] --[[Va+GP=PWn/&LQ1OVAR |St]] ; d=_tujwz[ --[[wv.LF77AzKcHo&]] 15 --[[zcHqAvIcZmNAmpPiMCmXxxj]] ]
+      a --[[9Ve6ZGs-7no790M82zpm7]] =(a --[[F-B6AZp;~wJA-PXvO]] +b --[[Ad8&z]] )%_pzcrq; d= --[[/v!Rc]] _d4tk7(_diug5( --[[7wRGvSl?~nC?h87]] d,a),16 --[[r5X1X,Ny9V=hFq+iuh<#]] )
+      c=(c --[[jZdpQmDJMEkWgWeqdlWqkom]] +d)%_pzcrq; b=_d4tk7(_diug5(b,c),12)
+      a= --[[Vf>ueJ8g!xMe]] ( --[[T&<Vq-]] a+b)%_pzcrq; d=_d4tk7(_diug5(d,a),8) --[[5Jp7W6,pc2@n779L#YyK!2@]] 
+      c=(c --[[KT#YDwUsq8SXjnVu49UMh167]] +d)% --[[iy6CCwI?*_s27C6J&d4]] _pzcrq; b=_d4tk7(_diug5 --[[.HDuW1&NN8]] (b,c), --[[ZXf]] 7)
+      _tujwz --[[MOGbD]] [3]=a; _tujwz --[[?MpG,k&]] [7]=b; _tujwz --[[/Z#ZV<~]] [11]=c --[[X:fRRVQ]] ; _tujwz --[[iWQ]] [15 --[[S0=>iA:0]] ]=d
+      a=_tujwz[4]; b=_tujwz[8]; c=_tujwz[12]; d= --[[TL#.i,XVenU*yO|yv&wW.wa_]] _tujwz[16]
+      a=(a+b)%_pzcrq; d=_d4tk7(_diug5(d, --[[0mY6s ]] a), --[[dtXFoUcZkUplgAQjKovYzCuj]] 16)
+      c=(c+d)%_pzcrq; b=_d4tk7(_diug5(b,c --[[q|oq@D6:SF9s,FS]] ), --[[u6hQ.@.pa!g/IkHQUIL#]] 12)
+      a=( --[[u_LPfSncFYnmCWxLqChQhOI]] a+b)% --[[R6M~]] _pzcrq --[[.tsYpz3A~<~]] ; d=_d4tk7(_diug5(d --[[&P|U&SDOI_J/]] ,a),8 --[[UqzqaicjMMRKZYfz]] )
+      c=( --[[lIlPS]] c+d)% --[[7_9iStl]] _pzcrq; b --[[~9KEjvyLI,!%Zmu]] =_d4tk7(_diug5(b --[[6z6y?*s]] ,c),7 --[[KwDQxlbo.]] )
+      _tujwz[4]= --[[0d3xY9o1fBlWUU13j*]] a; _tujwz[8]=b; --[[dXU;CDE<;0*<B*f>uY]]  _tujwz[12]=c; _tujwz[16]=d --[[IeQuxMwzWeaLw]] 
+      a=_tujwz[1]; b --[[TeqFIWGRLX]] =_tujwz[6]; c=_tujwz --[[=h61uA3KlBV=dgl=~b+w%D]] [11 --[[|oc/EvIeet]] ]; --[[APAaK;n0sPjqV]]  d=_tujwz --[[LSChsgvkpajXBTLyoqi]] [16]
+      a=(a+b)%_pzcrq; d --[[BJh0]] =_d4tk7(_diug5(d,a --[[.n4na:%=ZcIbu]] ),16 --[[CxIFYRwUZjegLAscI]] )
+      c=(c+d)%_pzcrq; b=_d4tk7(_diug5( --[[CQzFXIukqEdQYusfPSpYkyDT]] b, --[[Rsj_ok>dS6/5hPxxrZfq.Qtv]] c),12 --[[Ve5u/:?ckRF&0TaQ4;a8]] )
+      a=(a+b --[[*Fe,zsXW6]] )%_pzcrq; d=_d4tk7(_diug5(d,a), --[[H4/eqiOeKHnDo]] 8)
+      c=(c --[[Y8tyUTggZ#BZgRtL,L&Pgrd]] + --[[H2X7ma~]] d)%_pzcrq; b=_d4tk7 --[[KHYuwiooi_VksSfPiekvqSKK]] (_diug5 --[[khXzO;>5#5JD]] ( --[[xfD@=zIX4<k]] b,c),7)
+      _tujwz[1]=a --[[edXL-F#Y+!>M62#CB5]] ; --[[miyASTh]]  _tujwz[6]=b; _tujwz[11]=c; --[[VBnETzgpXOonzqmZGdnxZfsT]]  _tujwz[16]=d
+      a=_tujwz[ --[[ztAoyO]] 2] --[[-%TYkI>;Lz%YIxA:%]] ; b=_tujwz[7]; c= --[[zvPQY+/o#sh9zwm#|yN]] _tujwz[12]; d=_tujwz[13]
+      a=(a+b)%_pzcrq; --[[5CT6f|k~0M2BMX>l]]  d=_d4tk7(_diug5(d --[[dWRZVpCkmhuVJJVQYxq]] ,a),16)
+      c=(c --[[JpW h435d*0GGEXpN]] +d --[[@Mjf-o+xiGE/*f;q+!/rt1]] ) --[[uuQe@!pm;De44*;0JV/fS]] %_pzcrq; --[[VXyBlOQH]]  b=_d4tk7 --[[Pzfkr/~uZ1]] ( --[[d1;]] _diug5(b, --[[q<-FXM/&CiCAf]] c),12) --[[YilWNK@+&~c1X6]] 
+      a=(a+b)% --[[wvfXsCImqtPvFTVIGmtzqQEr]] _pzcrq --[[,+7%> yr-3Fb]] ; d= --[[_~F]] _d4tk7(_diug5(d,a),8)
+      c=(c --[[w*:Z78F|N|yt]] +d --[[LWUvbMXQZH]] )%_pzcrq --[[3fI|q.Db4v?A2,7Pyk&GJ-K]] ; b=_d4tk7(_diug5(b,c),7)
+      _tujwz[2]=a --[[wYk]] ; _tujwz[7]=b; --[[8WqA:x2juyE5]]  _tujwz[12]=c; _tujwz[13]=d
+      a=_tujwz[3]; b --[[CwGevA6t>wr+8X1*wf=]] = --[[okWDrFSCldVqjYiXwMG]] _tujwz --[[obZx!fX2GctSm *81Fg_]] [8]; --[[ktaaufCrBXQRDeXpKED]]  c=_tujwz[ --[[B*>B>520|g!atd4g1N]] 9]; d=_tujwz[14]
+      a --[[is-.2d48zGM]] =(a+b --[[vD~ 2x+uBK1jco8,-L]] )%_pzcrq; --[[!Q87>&6RD.zo#4=p+vHs]]  d= --[[-Ww;?nv1J_Oufx496V@mwS~]] _d4tk7(_diug5 --[[oahI-wOA1_*]] ( --[[@%lWZA;g/Tl+Ix%g/|SA3]] d --[[h_GQFngZLVhyrpodzt]] ,a),16)
+      c --[[j=|E.@OkzL2wZ8mRdyNF]] =( --[[!VdmrXy74LNwYD%]] c+d) --[[kwJShcyFCMa]] %_pzcrq; b=_d4tk7 --[[wF~jrL~@ -x]] (_diug5(b,c),12)
+      a= --[[IJPNHyvXRSWtAWjxgQQklEm]] (a+b)% --[[XQcStBeSxKDIRCAKNp_jdpJl]] _pzcrq; --[[~/VN@3u4ylznxU/PrN<]]  d=_d4tk7(_diug5(d,a),8)
+      c=(c+ --[[8==tP/a >Sy;7JJR3j1C]] d)%_pzcrq; --[[4kJ3I58K=V/~tpg1UZQp]]  b=_d4tk7(_diug5(b,c), --[[gU00-8g;vhiT+E@C;>]] 7)
+      _tujwz[3]=a; _tujwz[8]=b; _tujwz[9]=c --[[nXUXcRlXY]] ; _tujwz[14 --[[W%BkdwWuLq7uX57VGYZr]] ]=d
+      a=_tujwz --[[CHM%7e&=.,,13t%<*1i*]] [4]; b= --[[_w~fG0=v7XK]] _tujwz[5] --[[ePE?MY0,BIQ?]] ; c=_tujwz[10]; d=_tujwz[15]
+      a=(a+b)%_pzcrq; --[[bLpQMU3O80%N@]]  d= --[[Fkpm92AmXxG]] _d4tk7 --[[nYholhw]] (_diug5(d,a),16)
+      c=(c+d)%_pzcrq; b=_d4tk7(_diug5(b, --[[RtLpNveexUTMRDTo]] c),12)
+      a=(a+ --[[dggX.7Yy@lJ/OQ*lVI@]] b)%_pzcrq; d --[[OKgALi]] =_d4tk7(_diug5(d,a), --[[>krK?.E+f:]] 8)
+      c=(c+d)%_pzcrq; b=_d4tk7(_diug5(b,c) --[[0wpt|?PQ9vC0Zj93F!c]] ,7)
+      _tujwz[4]= --[[NYb]] a; _tujwz[ --[[KDB!LRkd7% &NBZo=]] 5]=b; _tujwz[10]=c; _tujwz[15]=d --[[5ulWLR,Ed04Chu5Yb_F]] 
+    end
+    for _i --[[j6-;a;L/Z]]  = 1, 16 do
+      local _word = ( --[[QpDZ~c|d]] _tujwz[_i] + _ewcdf[_i]) % _pzcrq --[[Y?0g!onYKI/Nj #]] 
+      local _b0 = _dmqz6(_word, 255 --[[iAPIhofcpGsDgwyjSs]] )
+      local _b1 = --[[7 eyraq]]  _dmqz6(_lhwcu --[[x!#+9!eCp|oDh5Dx]] (_word, 8) --[[24BC]] , 255 --[[xLZIOftFCB]] )
+      local _b2 = _dmqz6( --[[33i1/E7kif5_SGtJ+i]] _lhwcu(_word, 16), 255)
+      local _b3 = _dmqz6(_lhwcu(_word, 24), 255)
+      local _iwazv = {_b0, _b1, _b2, _b3}
+      for _j = 1, --[[xSkcBvXrNfrCNeVMAaM_]]  4 do
+        if _ncejv > _len then break --[[OCYMTcvG]]  end --[[.vv+Y~=G&6/xg-tx]] 
+        _thyth --[[.WG7H&/Z_-3Ro6?7R7B6CPwf]]  = _thyth --[[6G64bH_w.Zr8oG!uSg1tBm!!]]  + 1
+        _zcuos[_thyth --[[RM7Jk5mRYJ]] ] = _did39( --[[woVNCYnCYDEiSdh]] _diug5( --[[,& q5|]] _df6w8 --[[X_jKgn]] (_ct, _ncejv), _iwazv[_j --[[Ch=b<6>W|Q.z;mm5r]] ]))
+        _ncejv = _ncejv + 1
+      end
+    end
+    _qtstp --[[~2ewLDZfuEUA|Sv13ni0]]  = _qtstp + 1
+  end
+  return _dgm8a(_zcuos) --[[ epMqPKb7JdXjvb/aT]] 
+end
+
+local _demtb
+do --[[MDfsgq]] 
+  local _ieshq = "KiQCxH0J4MBlkYERzNuotwnGvIWd26ma8/ZbcUO".."y+esFhPfDp5S731jAgXVqTr9L"
+  local _quhgv = {}
+  for _utgba --[[pcFbVYveVfCaUtHKXvF]]  = 1, 64 do --[[ttZ Or+8Bm*#nGg>]]  _quhgv[_dwhkc(_ieshq, _utgba --[[x,s8?@q|r*6Y@=+ ]] )] = _utgba - 1 end
+  local function _udlyz(_mhmqr)
+    local _tkehc = {}
+    local _gpdmx = 0
+    local _dmspt = --[[>!#v1b;O#w~ruJ!@lU]]  #_mhmqr
+    local _utgba = 1
+    while _utgba <= --[[EVi6YWPgSkPn]]  _dmspt do
+      local _jsutc = _quhgv[ --[[.xBPRkRdRm?<AdGdj]] _dwhkc(_mhmqr, _utgba)]
+      local _asgdl = _quhgv[_dwhkc(_mhmqr, --[[&#i_&0l%JX_a<=wLa4Q> lo]]  _utgba + 1)] --[[QnysfUhRynEvfUu]] 
+      local _chkwq = _quhgv --[[e7#!yCvJ|s@RsBlPwm#4]] [_dwhkc(_mhmqr, --[[&.%REK.|mE,]]  _utgba + 2)]
+      local _utmqy = _quhgv[_dwhkc(_mhmqr --[[?I+1*%z8~*y0#]] , _utgba + 3)]
+      local _qxfuq = _jsutc * 262144 + _asgdl --[[RoqBlPXczdPqcRaLX]]  * 4096 + (_chkwq or 0) * 64 --[[qYt-wE55Mf&8H9~RY]]  + (_utmqy --[[MpDiVVYVEJKjMoDToMUGo]]  or --[[gE*Q1L8F0;ur]]  0 --[[vO<0.QQg4%!X:q>]] )
+      _gpdmx = _gpdmx + 1
+      _tkehc[_gpdmx] = _djpcd((_qxfuq - _qxfuq % 65536) / 65536)
+      if _chkwq then
+        _gpdmx = _gpdmx + 1
+        _tkehc[_gpdmx] --[[P V3*B;CY;dI ,cU-vKuT]]  = _djpcd(((_qxfuq - _qxfuq % 256) / 256) % 256)
+        if _utmqy then --[[W8YlimFkqsILYb]] 
+          _gpdmx --[[a=qFWq2YlRxBNZ]]  = _gpdmx + 1
+          _tkehc[_gpdmx] --[[Be-Dh2K,* GMXB=mNe +ZZ]]  = _djpcd --[[?AF+/1GJX@1BX]] (_qxfuq % 256)
+        end --[[,-m1]] 
+      end
+      _utgba --[[iixKoxDdVF_xQRUnjgNviGPx]]  = _utgba + 4
+    end
+    return _dikbf(_tkehc)
+  end
+  _demtb --[[TRwsHCtgOMG]]  = _udlyz
+end
+local _dmpqr= --[[zzj]] _demtb --[[3 YZ0u+-*>zz~=<]] ("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
