@@ -1,0 +1,135 @@
+
+-- ANIME ADVENTURES LOADING SCREEN
+-- Automatic 120-second loading sequence
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "AnimeAdventuresLoading"
+gui.IgnoreGuiInset = true
+gui.ResetOnSpawn = false
+
+local success = pcall(function()
+    gui.Parent = CoreGui
+end)
+
+if not success then
+    gui:Destroy()
+    return
+end
+
+local background = Instance.new("Frame")
+background.Size = UDim2.fromScale(1, 1)
+background.BackgroundColor3 = Color3.fromRGB(5, 9, 7)
+background.BorderSizePixel = 0
+background.Parent = gui
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 45)
+title.Position = UDim2.new(0, 0, 0.34, 0)
+title.BackgroundTransparency = 1
+title.Text = "ANIME ADVENTURES"
+title.TextColor3 = Color3.fromRGB(75, 255, 135)
+title.Font = Enum.Font.GothamBlack
+title.TextSize = 25
+title.Parent = background
+
+local subtitle = Instance.new("TextLabel")
+subtitle.Size = UDim2.new(1, 0, 0, 25)
+subtitle.Position = UDim2.new(0, 0, 0.34, 45)
+subtitle.BackgroundTransparency = 1
+subtitle.Text = "INITIALIZING..."
+subtitle.TextColor3 = Color3.fromRGB(160, 190, 170)
+subtitle.Font = Enum.Font.GothamMedium
+subtitle.TextSize = 11
+subtitle.Parent = background
+
+local barBack = Instance.new("Frame")
+barBack.Size = UDim2.new(0.55, 0, 0, 8)
+barBack.Position = UDim2.new(0.225, 0, 0.52, 0)
+barBack.BackgroundColor3 = Color3.fromRGB(25, 40, 29)
+barBack.BorderSizePixel = 0
+barBack.Parent = background
+
+local barCorner = Instance.new("UICorner")
+barCorner.CornerRadius = UDim.new(1, 0)
+barCorner.Parent = barBack
+
+local bar = Instance.new("Frame")
+bar.Size = UDim2.new(0, 0, 1, 0)
+bar.BackgroundColor3 = Color3.fromRGB(65, 255, 130)
+bar.BorderSizePixel = 0
+bar.Parent = barBack
+
+local barFillCorner = Instance.new("UICorner")
+barFillCorner.CornerRadius = UDim.new(1, 0)
+barFillCorner.Parent = bar
+
+local status = Instance.new("TextLabel")
+status.Size = UDim2.new(0.7, 0, 0, 25)
+status.Position = UDim2.new(0.15, 0, 0.55, 0)
+status.BackgroundTransparency = 1
+status.Text = "[NEXUS] Initializing system..."
+status.TextColor3 = Color3.fromRGB(100, 220, 140)
+status.Font = Enum.Font.Code
+status.TextSize = 11
+status.Parent = background
+
+local percent = Instance.new("TextLabel")
+percent.Size = UDim2.new(0.55, 0, 0, 20)
+percent.Position = UDim2.new(0.225, 0, 0.59, 0)
+percent.BackgroundTransparency = 1
+percent.Text = "0%"
+percent.TextColor3 = Color3.fromRGB(75, 255, 135)
+percent.Font = Enum.Font.GothamBold
+percent.TextSize = 11
+percent.TextXAlignment = Enum.TextXAlignment.Right
+percent.Parent = background
+
+local messages = {
+    "[NEXUS] Initializing system...",
+    "[NEXUS] Loading required components...",
+    "[NEXUS] Checking configuration...",
+    "[NEXUS] Preparing game interface...",
+    "[NEXUS] Loading visual assets...",
+    "[NEXUS] Optimizing interface...",
+    "[NEXUS] Finalizing initialization..."
+}
+
+local duration = 120
+
+for elapsed = 1, duration do
+    local progress = elapsed / duration
+
+    bar.Size = UDim2.new(progress, 0, 1, 0)
+    percent.Text = math.floor(progress * 100) .. "%"
+
+    local index = math.min(
+        math.floor(progress * #messages) + 1,
+        #messages
+    )
+
+    status.Text = messages[index]
+
+    task.wait(1)
+end
+
+status.Text = "[SUCCESS] Loading completed!"
+percent.Text = "100%"
+
+task.wait(1)
+
+local fade = TweenService:Create(
+    background,
+    TweenInfo.new(0.6),
+    {BackgroundTransparency = 1}
+)
+
+fade:Play()
+fade.Completed:Wait()
+
+gui:Destroy()
+
+-- YOUR MAIN GUI INITIALIZATION GOES HERE
