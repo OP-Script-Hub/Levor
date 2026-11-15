@@ -1,135 +1,539 @@
+local Players       = game:GetService("Players")
+local TweenService  = game:GetService("TweenService")
+local RunService    = game:GetService("RunService")
+local UserInput     = game:GetService("UserInputService")
 
--- ANIME ADVENTURES LOADING SCREEN
--- Automatic 120-second loading sequence
-
-local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
-local CoreGui = game:GetService("CoreGui")
-
-local gui = Instance.new("ScreenGui")
-gui.Name = "AnimeAdventuresLoading"
-gui.IgnoreGuiInset = true
-gui.ResetOnSpawn = false
-
-local success = pcall(function()
-    gui.Parent = CoreGui
-end)
-
-if not success then
-    gui:Destroy()
+local player = Players.LocalPlayer
+if not player then
+    warn("TraitSpawner: a client-side LocalPlayer is required")
     return
 end
+local playerGui = player:WaitForChild("PlayerGui")
 
-local background = Instance.new("Frame")
-background.Size = UDim2.fromScale(1, 1)
-background.BackgroundColor3 = Color3.fromRGB(5, 9, 7)
-background.BorderSizePixel = 0
-background.Parent = gui
+local GUI_NAME = "AA_TraitSpawner_ReferenceVisual"
+local LOAD_DURATION = 60   -- APPLY progress runs from 0% to 100% over 1 minute
+local RESULT_DURATION = 1.7
 
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 45)
-title.Position = UDim2.new(0, 0, 0.34, 0)
-title.BackgroundTransparency = 1
-title.Text = "ANIME ADVENTURES"
-title.TextColor3 = Color3.fromRGB(75, 255, 135)
-title.Font = Enum.Font.GothamBlack
-title.TextSize = 25
-title.Parent = background
+local previous = playerGui:FindFirstChild(GUI_NAME)
+if previous then previous:Destroy() end
 
-local subtitle = Instance.new("TextLabel")
-subtitle.Size = UDim2.new(1, 0, 0, 25)
-subtitle.Position = UDim2.new(0, 0, 0.34, 45)
-subtitle.BackgroundTransparency = 1
-subtitle.Text = "INITIALIZING..."
-subtitle.TextColor3 = Color3.fromRGB(160, 190, 170)
-subtitle.Font = Enum.Font.GothamMedium
-subtitle.TextSize = 11
-subtitle.Parent = background
+local gui = Instance.new("ScreenGui")
+gui.Name = GUI_NAME
+gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = true
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+gui.DisplayOrder = 90
+gui.Parent = playerGui
 
-local barBack = Instance.new("Frame")
-barBack.Size = UDim2.new(0.55, 0, 0, 8)
-barBack.Position = UDim2.new(0.225, 0, 0.52, 0)
-barBack.BackgroundColor3 = Color3.fromRGB(25, 40, 29)
-barBack.BorderSizePixel = 0
-barBack.Parent = background
-
-local barCorner = Instance.new("UICorner")
-barCorner.CornerRadius = UDim.new(1, 0)
-barCorner.Parent = barBack
-
-local bar = Instance.new("Frame")
-bar.Size = UDim2.new(0, 0, 1, 0)
-bar.BackgroundColor3 = Color3.fromRGB(65, 255, 130)
-bar.BorderSizePixel = 0
-bar.Parent = barBack
-
-local barFillCorner = Instance.new("UICorner")
-barFillCorner.CornerRadius = UDim.new(1, 0)
-barFillCorner.Parent = bar
-
-local status = Instance.new("TextLabel")
-status.Size = UDim2.new(0.7, 0, 0, 25)
-status.Position = UDim2.new(0.15, 0, 0.55, 0)
-status.BackgroundTransparency = 1
-status.Text = "[NEXUS] Initializing system..."
-status.TextColor3 = Color3.fromRGB(100, 220, 140)
-status.Font = Enum.Font.Code
-status.TextSize = 11
-status.Parent = background
-
-local percent = Instance.new("TextLabel")
-percent.Size = UDim2.new(0.55, 0, 0, 20)
-percent.Position = UDim2.new(0.225, 0, 0.59, 0)
-percent.BackgroundTransparency = 1
-percent.Text = "0%"
-percent.TextColor3 = Color3.fromRGB(75, 255, 135)
-percent.Font = Enum.Font.GothamBold
-percent.TextSize = 11
-percent.TextXAlignment = Enum.TextXAlignment.Right
-percent.Parent = background
-
-local messages = {
-    "[NEXUS] Initializing system...",
-    "[NEXUS] Loading required components...",
-    "[NEXUS] Checking configuration...",
-    "[NEXUS] Preparing game interface...",
-    "[NEXUS] Loading visual assets...",
-    "[NEXUS] Optimizing interface...",
-    "[NEXUS] Finalizing initialization..."
-}
-
-local duration = 120
-
-for elapsed = 1, duration do
-    local progress = elapsed / duration
-
-    bar.Size = UDim2.new(progress, 0, 1, 0)
-    percent.Text = math.floor(progress * 100) .. "%"
-
-    local index = math.min(
-        math.floor(progress * #messages) + 1,
-        #messages
-    )
-
-    status.Text = messages[index]
-
-    task.wait(1)
+local alive = true
+local connections = {}
+local function connect(signal, fn)
+    local c = signal:Connect(fn)
+    table.insert(connections, c)
+    return c
+end
+local function create(class, props, parent)
+    local object = Instance.new(class)
+    for key, value in pairs(props or {}) do object[key] = value end
+    object.Parent = parent
+    return object
+end
+local function rgb(r, g, b) return Color3.fromRGB(r, g, b) end
+local function round(object, radius)
+    return create("UICorner", {CornerRadius = UDim.new(0, radius)}, object)
+end
+local function stroke(object, color, thickness, trans)
+    return create("UIStroke", {
+        Color = color or rgb(255, 255, 255),
+        Thickness = thickness or 2,
+        Transparency = trans or 0,
+        ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    }, object)
+end
+local rainbowColors = ColorSequence.new({
+    ColorSequenceKeypoint.new(0.00, rgb(38, 182, 255)),
+    ColorSequenceKeypoint.new(0.16, rgb(121, 52, 255)),
+    ColorSequenceKeypoint.new(0.33, rgb(249, 50, 198)),
+    ColorSequenceKeypoint.new(0.49, rgb(255, 118, 45)),
+    ColorSequenceKeypoint.new(0.64, rgb(248, 239, 42)),
+    ColorSequenceKeypoint.new(0.80, rgb(56, 246, 116)),
+    ColorSequenceKeypoint.new(1.00, rgb(38, 182, 255))
+})
+local gradients = {}
+local function rainbow(object, rotation)
+    local g = create("UIGradient", {Color = rainbowColors, Rotation = rotation or 0}, object)
+    table.insert(gradients, g)
+    return g
+end
+local function tween(object, duration, props, easingStyle, easingDirection)
+    local info = TweenInfo.new(duration, easingStyle or Enum.EasingStyle.Quad,
+        easingDirection or Enum.EasingDirection.Out)
+    local t = TweenService:Create(object, info, props)
+    t:Play()
+    return t
+end
+local function textLabel(parent, value, size, position, dimensions, color, font, z)
+    return create("TextLabel", {
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
+        Text = value,
+        Font = font or Enum.Font.FredokaOne,
+        TextSize = size,
+        TextColor3 = color or rgb(255, 255, 255),
+        TextStrokeColor3 = rgb(0, 0, 0),
+        TextStrokeTransparency = 0.4,
+        Position = position,
+        Size = dimensions,
+        TextXAlignment = Enum.TextXAlignment.Center,
+        TextYAlignment = Enum.TextYAlignment.Center,
+        ZIndex = z or 3
+    }, parent)
 end
 
-status.Text = "[SUCCESS] Loading completed!"
-percent.Text = "100%"
+-- Icon shapes: constructed from Roblox Frames, no external image asset needed.
+local function crown(parent, position, size, z)
+    local root = create("Frame", {
+        Position = position, Size = size, BackgroundTransparency = 1,
+        BorderSizePixel = 0, ZIndex = z or 5
+    }, parent)
+    local blocks = {
+        {0.07,0.10,0.19,0.33}, {0.41,0.00,0.18,0.45}, {0.74,0.10,0.19,0.33},
+        {0.07,0.36,0.86,0.24}, {0.13,0.60,0.74,0.13}, {0.13,0.78,0.74,0.17}
+    }
+    for _, p in ipairs(blocks) do
+        local block = create("Frame", {
+            Position = UDim2.fromScale(p[1], p[2]),
+            Size = UDim2.fromScale(p[3], p[4]),
+            BackgroundColor3 = rgb(255,255,255), BorderSizePixel = 0,
+            ZIndex = (z or 5) + 1
+        }, root)
+        rainbow(block, 20)
+        stroke(block, rgb(7,6,17), 1.4)
+    end
+    return root
+end
+local function sparkle(parent, position, size, z)
+    local root = create("Frame", {
+        Position = position, Size = size, BackgroundTransparency = 1, ZIndex = z or 5
+    }, parent)
+    local pieces = {
+        {0.29,0.28,0.44,0.44,45}, {0.05,0.02,0.18,0.18,45},
+        {0.75,0.04,0.14,0.14,45}, {0.75,0.75,0.16,0.16,45}
+    }
+    for _, p in ipairs(pieces) do
+        local piece = create("Frame", {
+            Position = UDim2.fromScale(p[1], p[2]),
+            Size = UDim2.fromScale(p[3], p[4]),
+            Rotation = p[5], BackgroundColor3 = rgb(255,255,255),
+            BorderSizePixel = 0, ZIndex = (z or 5) + 1
+        }, root)
+        rainbow(piece, 40)
+    end
+    return root
+end
+local function traitIcon(parent, kind, position, size, z)
+    if kind == "crown" then return crown(parent, position, size, z) end
+    return sparkle(parent, position, size, z)
+end
 
-task.wait(1)
+-- Main window (same approximate dimensions and visual hierarchy as the clip).
+local panel = create("Frame", {
+    Name = "TraitSpawnerPanel",
+    AnchorPoint = Vector2.new(0.5, 0.5),
+    Position = UDim2.fromScale(0.515, 0.59),
+    Size = UDim2.fromOffset(530, 575),
+    BackgroundColor3 = rgb(9, 9, 13),
+    BorderSizePixel = 0,
+    Active = true, ZIndex = 1
+}, gui)
+round(panel, 11)
+local panelStroke = stroke(panel, rgb(255,255,255), 3)
+rainbow(panelStroke, 0)
+local responsiveScale = create("UIScale", {Scale = 1}, panel)
 
-local fade = TweenService:Create(
-    background,
-    TweenInfo.new(0.6),
-    {BackgroundTransparency = 1}
-)
+local function resize()
+    if not gui.Parent then return end
+    local camera = workspace.CurrentCamera
+    if not camera then return end
+    local v = camera.ViewportSize
+    responsiveScale.Scale = math.clamp(math.min((v.X - 16) / 560, (v.Y - 22) / 600), 0.43, 1)
+end
+resize()
+local camera = workspace.CurrentCamera
+if camera then connect(camera:GetPropertyChangedSignal("ViewportSize"), resize) end
+connect(workspace:GetPropertyChangedSignal("CurrentCamera"), function()
+    camera = workspace.CurrentCamera
+    if camera then
+        connect(camera:GetPropertyChangedSignal("ViewportSize"), resize)
+        resize()
+    end
+end)
 
-fade:Play()
-fade.Completed:Wait()
+local header = create("Frame", {
+    Name = "Header", Position = UDim2.fromOffset(4,4), Size = UDim2.new(1,-8,0,48),
+    BackgroundColor3 = rgb(30,27,33), BorderSizePixel = 0, Active = true, ZIndex = 2
+}, panel)
+round(header, 8)
+local headerTitle = textLabel(header, "Trait Spawner", 18,
+    UDim2.fromOffset(15, 5), UDim2.new(1,-90,0,36), rgb(255,255,255), Enum.Font.FredokaOne, 4)
+headerTitle.TextXAlignment = Enum.TextXAlignment.Left
 
-gui:Destroy()
+local closeButton = create("TextButton", {
+    Name = "Close", Position = UDim2.new(1,-46,0,3), Size = UDim2.fromOffset(41,41),
+    BackgroundColor3 = rgb(229,43,65), Text = "X", TextSize = 23,
+    TextColor3 = rgb(255,255,255), TextStrokeTransparency = 0.18,
+    TextStrokeColor3 = rgb(0,0,0), Font = Enum.Font.FredokaOne,
+    AutoButtonColor = false, BorderSizePixel = 0, ZIndex = 7
+}, header)
+round(closeButton, 10)
+stroke(closeButton, rgb(255,255,255), 2.5)
 
--- YOUR MAIN GUI INITIALIZATION GOES HERE
+-- Scroll list / data from the user's previously requested traits.
+local scroll = create("ScrollingFrame", {
+    Name = "TraitList", Position = UDim2.fromOffset(13,59),
+    Size = UDim2.new(1,-26,1,-150),
+    BackgroundTransparency = 1, BorderSizePixel = 0,
+    ScrollBarThickness = 5, ScrollBarImageColor3 = rgb(201,180,224),
+    ScrollBarImageTransparency = .15,
+    CanvasSize = UDim2.fromOffset(0,0),
+    AutomaticCanvasSize = Enum.AutomaticSize.Y,
+    ScrollingDirection = Enum.ScrollingDirection.Y,
+    ClipsDescendants = true, ZIndex = 2
+}, panel)
+create("UIListLayout", {
+    SortOrder = Enum.SortOrder.LayoutOrder,
+    Padding = UDim.new(0,7)
+}, scroll)
+create("UIPadding", {PaddingBottom = UDim.new(0,8)}, scroll)
+
+-- Traits not shown clearly in the clip retain placeholder descriptions,
+-- while Golden and Unique reproduce the visible bonuses exactly.
+local traits = {
+    {name="Superior", chance="25%", icon="sparkle", info="<font color='#FF6262'>+10% Damage</font>"},
+    {name="Range", chance="18%", icon="sparkle", info="<font color='#FFE88A'>+10% Range</font>"},
+    {name="Nimble", chance="12%", icon="sparkle", info="<font color='#9FDDFF'>-10% Cooldown</font>"},
+    {name="Godspeed", chance="1%", icon="sparkle", info="<font color='#9FDDFF'>-20% Cooldown</font>"},
+    {name="Celestial", chance="0.36%", icon="sparkle", info="<font color='#FFE88A'>Rare trait  •  0.36% chance</font>"},
+    {name="Divine", chance="0.2%", icon="sparkle", info="<font color='#FF6464'>+20% Damage</font>, <font color='#FFF08E'>+20% Range</font>\n<font color='#9EDBFF'>-10% Cooldown</font>"},
+    {name="Golden", chance="0.15%", icon="sparkle", info="<font color='#FF6060'>+30% Damage</font>\n<font color='#FFE77B'>+10% Kill Money, +20% Farm Money</font>"},
+    {name="Unique", chance="0.1%", icon="crown", info="<font color='#FF6666'>+300% Damage</font>, <font color='#FFE77B'>+10% Range</font>\n<font color='#9FDFFF'>-10% Cooldown</font>\n<font color='#FFE77B'>Max 1 placed</font>"}
+}
+local cards = {}
+local selected = #traits
+local busy = false
+
+local function cardShell(parent, height)
+    local f = create("Frame", {
+        Size = UDim2.new(1,-7,0,height),
+        BackgroundColor3 = rgb(16,11,24), BorderSizePixel = 0, ZIndex = 3
+    }, parent)
+    round(f, 8)
+    local s = stroke(f, rgb(255,255,255), 2)
+    rainbow(s, 20)
+    return f
+end
+
+for i, t in ipairs(traits) do
+    local holder = create("Frame", {
+        Name = "Trait_" .. t.name,
+        Size = UDim2.new(1,0,0,122),
+        BackgroundTransparency = 1,
+        LayoutOrder = i,
+        ZIndex = 3
+    }, scroll)
+
+    local button = create("TextButton", {
+        Name = "Select_" .. t.name,
+        Text = "", AutoButtonColor = false,
+        Position = UDim2.fromOffset(0,0),
+        Size = UDim2.new(1,-7,0,51),
+        BackgroundColor3 = rgb(30,21,42), BorderSizePixel = 0,
+        ZIndex = 4
+    }, holder)
+    round(button, 10)
+    local edge = stroke(button, rgb(255,255,255), 2.8)
+    rainbow(edge, 20)
+    traitIcon(button, t.icon, UDim2.fromOffset(8,6), UDim2.fromOffset(39,37), 6)
+
+    local name = textLabel(button, t.name, 23, UDim2.fromOffset(65,7),
+        UDim2.new(1,-170,0,36), rgb(255,95,215), Enum.Font.FredokaOne, 6)
+    rainbow(name, 30)
+    local chance = textLabel(button, t.chance, 16, UDim2.new(1,-90,0,9),
+        UDim2.fromOffset(77,32), rgb(255,176,200), Enum.Font.FredokaOne, 6)
+    chance.TextXAlignment = Enum.TextXAlignment.Right
+    rainbow(chance, 15)
+
+    local description = cardShell(holder, 66)
+    description.Position = UDim2.fromOffset(8,55)
+    description.Size = UDim2.new(1,-23,0,66)
+    local descText = textLabel(description, t.info, 14, UDim2.fromOffset(9,2),
+        UDim2.new(1,-18,1,-4), rgb(255,255,255), Enum.Font.FredokaOne, 5)
+    descText.RichText = true
+    descText.TextWrapped = true
+    descText.TextStrokeTransparency = .2
+    cards[i] = {button = button, holder = holder}
+    connect(button.MouseEnter, function()
+        if not busy and selected ~= i then
+            tween(button,.14,{BackgroundColor3=rgb(51,32,67)})
+        end
+    end)
+    connect(button.MouseLeave, function()
+        if not busy and selected ~= i then
+            tween(button,.14,{BackgroundColor3=rgb(30,21,42)})
+        end
+    end)
+end
+
+local footer = create("Frame", {
+    Name = "Footer", Position = UDim2.new(0,12,1,-78),
+    Size = UDim2.new(1,-24,0,68),
+    BackgroundColor3 = rgb(29,27,32), BorderSizePixel = 0, ZIndex = 5
+}, panel)
+round(footer, 10)
+stroke(footer, rgb(83,81,89), 1.6)
+local footerIcon = create("Frame", {
+    Name = "SelectedIcon", Position = UDim2.fromOffset(11,13),
+    Size = UDim2.fromOffset(39,40), BackgroundTransparency = 1, ZIndex = 6
+},footer)
+local footerName = textLabel(footer, "Unique", 17,
+    UDim2.fromOffset(54,7), UDim2.fromOffset(205,28), rgb(255,255,255),
+    Enum.Font.FredokaOne, 7)
+footerName.TextXAlignment = Enum.TextXAlignment.Left
+rainbow(footerName,0)
+local footerChance = textLabel(footer, "0.1% chance", 13,
+    UDim2.fromOffset(54,34), UDim2.fromOffset(195,24), rgb(175,170,181),
+    Enum.Font.GothamMedium, 7)
+footerChance.TextXAlignment = Enum.TextXAlignment.Left
+footerChance.TextStrokeTransparency = .85
+
+local apply = create("TextButton", {
+    Name = "Apply", Position = UDim2.new(1,-157,0,10),
+    Size = UDim2.fromOffset(145,49),
+    BackgroundColor3 = rgb(64,226,102), BorderSizePixel = 0,
+    Text = "APPLY", TextSize = 20, Font = Enum.Font.FredokaOne,
+    TextStrokeTransparency = .03, TextStrokeColor3 = rgb(5,25,7),
+    TextColor3 = rgb(218,255,231), AutoButtonColor = false, ZIndex = 7
+}, footer)
+round(apply, 12)
+stroke(apply, rgb(31,119,53), 2.5)
+create("UIGradient", {Color=ColorSequence.new(rgb(91,255,139),rgb(17,146,59)),Rotation=90},apply)
+local applyScale = create("UIScale",{Scale=1},apply)
+connect(apply.MouseEnter,function() if not busy then tween(applyScale,.16,{Scale=1.035}) end end)
+connect(apply.MouseLeave,function() if not busy then tween(applyScale,.16,{Scale=1}) end end)
+connect(apply.MouseButton1Down,function() if not busy then tween(applyScale,.09,{Scale=.96}) end end)
+connect(apply.MouseButton1Up,function() if not busy then tween(applyScale,.13,{Scale=1.03}) end end)
+
+local function updateSelected()
+    for i, item in ipairs(cards) do
+        tween(item.button,.15,{BackgroundColor3 = (i == selected) and rgb(81,67,94) or rgb(30,21,42)})
+    end
+    footerName.Text = traits[selected].name
+    footerChance.Text = traits[selected].chance .. " chance"
+    footerIcon:ClearAllChildren()
+    traitIcon(footerIcon, traits[selected].icon, UDim2.fromScale(0,0),UDim2.fromScale(1,1),8)
+end
+for i, item in ipairs(cards) do
+    connect(item.button.MouseButton1Click, function()
+        if busy then return end
+        selected = i
+        updateSelected()
+    end)
+end
+updateSelected()
+
+-- Reference video initially shows Golden and Unique toward bottom of list.
+task.defer(function()
+    task.wait(.18)
+    if scroll.Parent then
+        scroll.CanvasPosition = Vector2.new(0,
+            math.max(0, scroll.AbsoluteCanvasSize.Y - scroll.AbsoluteWindowSize.Y))
+    end
+end)
+
+-- Dim overlay shown while applying (visible within the panel).
+local overlay = create("Frame", {
+    Name = "Darkening", Size = UDim2.fromScale(1,1),
+    BackgroundColor3 = rgb(0,0,0), BackgroundTransparency = .48,
+    BorderSizePixel = 0, Visible = false, Active = true, ZIndex = 20
+}, panel)
+round(overlay,11)
+
+local loading = create("Frame", {
+    Name = "LoadingPopup", AnchorPoint = Vector2.new(.5,.5),
+    Position = UDim2.fromScale(.5,.5), Size = UDim2.fromOffset(350,158),
+    BackgroundColor3 = rgb(12,12,16), BorderSizePixel = 0, ZIndex = 22,
+    Visible = false
+}, overlay)
+round(loading, 15)
+local loadEdge = stroke(loading, rgb(255,255,255), 3.5)
+rainbow(loadEdge, 0)
+local loadScale = create("UIScale",{Scale=.88}, loading)
+local loadingTitle = textLabel(loading, "Applying Unique...",19,
+    UDim2.fromOffset(14,11), UDim2.new(1,-28,0,43), rgb(255,255,255),Enum.Font.FredokaOne, 24)
+rainbow(loadingTitle, 0)
+local progressTrack = create("Frame", {
+    Name = "ProgressTrack", Position = UDim2.fromOffset(25,70),
+    Size = UDim2.new(1,-50,0,24), BackgroundColor3 = rgb(18,18,23),
+    BorderSizePixel = 0, ClipsDescendants = true, ZIndex = 24
+},loading)
+round(progressTrack,8)
+stroke(progressTrack,rgb(91,91,98),2)
+local progressFill = create("Frame", {
+    Name = "RainbowFill", Size = UDim2.fromScale(0,1),
+    BackgroundColor3 = rgb(255,255,255), BorderSizePixel = 0, ZIndex = 25
+},progressTrack)
+round(progressFill,7)
+local fillGradient = rainbow(progressFill,0)
+local progressText = textLabel(loading,"0%",17,
+    UDim2.fromOffset(15,105),UDim2.new(1,-30,0,36),rgb(255,255,255),Enum.Font.FredokaOne,25)
+progressText.TextStrokeTransparency = .4
+
+-- Video's success animation: rainbow rim, big crown, "TRAIT APPLIED", Unique.
+local success = create("Frame", {
+    Name = "SuccessPopup", AnchorPoint = Vector2.new(.5,.5),
+    Position = UDim2.fromScale(.5,.5), Size = UDim2.fromOffset(330,215),
+    BackgroundColor3 = rgb(12,12,16), BorderSizePixel = 0,
+    Visible = false, ZIndex = 30
+}, overlay)
+round(success,16)
+local successEdge=stroke(success,rgb(255,255,255),3.5)
+rainbow(successEdge,35)
+local successScale=create("UIScale",{Scale=.52},success)
+local appliedTitle=textLabel(success,"TRAIT APPLIED",16,
+    UDim2.fromOffset(12,12),UDim2.new(1,-24,0,29),rgb(196,193,206),Enum.Font.GothamBold,32)
+appliedTitle.TextStrokeTransparency = .9
+local successIconHolder=create("Frame",{
+    Position=UDim2.new(.5,-42,0,51),Size=UDim2.fromOffset(84,76),
+    BackgroundTransparency=1,ZIndex=32
+},success)
+local outcomeIcon = traitIcon(successIconHolder, "crown", UDim2.fromScale(0,0),UDim2.fromScale(1,1),33)
+local outcomeText=textLabel(success,"Unique",28,
+    UDim2.fromOffset(16,143),UDim2.new(1,-32,0,49),rgb(79,255,148),Enum.Font.FredokaOne,33)
+rainbow(outcomeText,75)
+
+local function clearOutcomeIcon(kind)
+    successIconHolder:ClearAllChildren()
+    outcomeIcon = traitIcon(successIconHolder, kind,UDim2.fromScale(0,0),UDim2.fromScale(1,1),33)
+end
+
+local activeCycle = 0
+local function doApply()
+    if busy or not alive then return end
+    busy = true
+    activeCycle = activeCycle + 1
+    local cycle = activeCycle
+    local t = traits[selected]
+    apply.Text = "LOADING..."
+    tween(applyScale,.1,{Scale=1})
+    overlay.Visible = true
+    loading.Visible = true
+    success.Visible = false
+    loadingTitle.Text = "Applying " .. t.name .. "..."
+    progressText.Text = "0%"
+    progressFill.Size = UDim2.fromScale(0,1)
+    loadScale.Scale = .85
+    tween(loadScale,.25,{Scale=1},Enum.EasingStyle.Back)
+
+    local start = os.clock()
+    while alive and gui.Parent and cycle == activeCycle do
+        local percent = math.clamp((os.clock()-start)/LOAD_DURATION,0,1)
+        progressFill.Size = UDim2.fromScale(percent,1)
+        progressText.Text = tostring(math.floor(percent*100)) .. "%"
+        if percent >= 1 then break end
+        RunService.Heartbeat:Wait()
+    end
+    if not alive or not gui.Parent or cycle ~= activeCycle then return end
+    progressFill.Size = UDim2.fromScale(1,1)
+    progressText.Text = "100%"
+    task.wait(.15)
+    if not alive or not gui.Parent then return end
+    loading.Visible = false
+    success.Visible = true
+    clearOutcomeIcon(t.icon)
+    outcomeText.Text = t.name
+    successScale.Scale = .5
+    tween(successScale,.46,{Scale=1},Enum.EasingStyle.Back,Enum.EasingDirection.Out)
+    task.wait(RESULT_DURATION)
+    if not alive or not gui.Parent then return end
+    tween(successScale,.38,{Scale=.12},Enum.EasingStyle.Back,Enum.EasingDirection.In)
+    task.wait(.4)
+    if not alive or not gui.Parent then return end
+    success.Visible = false
+    overlay.Visible = false
+    apply.Text = "APPLY"
+    busy = false
+end
+connect(apply.MouseButton1Click,function() task.spawn(doApply) end)
+
+local function shutdown()
+    if not alive then return end
+    alive = false
+    activeCycle = activeCycle + 1
+    for _, conn in ipairs(connections) do conn:Disconnect() end
+    if gui.Parent then gui:Destroy() end
+end
+connect(closeButton.MouseButton1Click,shutdown)
+
+-- Drag anywhere on the title bar, works with touch and mouse; X remains clickable.
+local dragging = false
+local dragInput, dragOrigin, panelOrigin
+connect(header.InputBegan,function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or
+       input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragInput = input
+        dragOrigin = input.Position
+        panelOrigin = panel.Position
+    end
+end)
+connect(UserInput.InputChanged,function(input)
+    if not dragging or not dragOrigin then return end
+    if input.UserInputType == Enum.UserInputType.MouseMovement or
+       (dragInput and input == dragInput) then
+        local movement = input.Position - dragOrigin
+        local s = responsiveScale.Scale
+        panel.Position = UDim2.new(panelOrigin.X.Scale, panelOrigin.X.Offset+movement.X,
+            panelOrigin.Y.Scale, panelOrigin.Y.Offset+movement.Y)
+    end
+end)
+connect(UserInput.InputEnded,function(input)
+    if input == dragInput or input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+        dragInput = nil
+    end
+end)
+
+-- Entire rainbow effect rotates constantly; subtle diamond particles float behind UI.
+local elapsed = 0
+connect(RunService.RenderStepped,function(dt)
+    if not alive then return end
+    elapsed = elapsed + dt
+    local angle = (elapsed * 38) % 360
+    for _,g in ipairs(gradients) do
+        if g.Parent then g.Rotation = angle end
+    end
+    fillGradient.Offset = Vector2.new(math.sin(elapsed*1.7)*.38,0)
+end)
+
+local particleArea = create("Frame", {
+    Name="AmbientParticles", Position=UDim2.fromOffset(6,53),
+    Size=UDim2.new(1,-12,1,-110), BackgroundTransparency=1,
+    BorderSizePixel=0, ClipsDescendants=true, ZIndex=2
+},panel)
+-- Non-interactive particles do not block clicking cards.
+task.spawn(function()
+    while alive and gui.Parent do
+        task.wait(.43)
+        if not alive or not gui.Parent then break end
+        local side = math.random(16,95)/100
+        local diamond = create("Frame",{
+            Position=UDim2.fromScale(side,1.03),
+            Size=UDim2.fromOffset(math.random(4,8),math.random(4,8)),
+            Rotation=45, BackgroundColor3=Color3.fromHSV(math.random(),.7,1),
+            BackgroundTransparency=.42,BorderSizePixel=0,ZIndex=2
+        },particleArea)
+        tween(diamond,2.3,{Position=UDim2.fromScale(side,math.random(5,60)/100),
+            BackgroundTransparency=1},Enum.EasingStyle.Linear)
+        task.delay(2.4,function() if diamond.Parent then diamond:Destroy() end end)
+    end
+end)
