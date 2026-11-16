@@ -1,539 +1,462 @@
-local Players       = game:GetService("Players")
-local TweenService  = game:GetService("TweenService")
-local RunService    = game:GetService("RunService")
-local UserInput     = game:GetService("UserInputService")
-
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
 local player = Players.LocalPlayer
-if not player then
-    warn("TraitSpawner: a client-side LocalPlayer is required")
-    return
-end
+if not player then return end
 local playerGui = player:WaitForChild("PlayerGui")
+local NAME = "SilentProductions_Floating"
+local WIDTH, HEIGHT = 570, 370
 
-local GUI_NAME = "AA_TraitSpawner_ReferenceVisual"
-local LOAD_DURATION = 60   -- APPLY progress runs from 0% to 100% over 1 minute
-local RESULT_DURATION = 1.7
-
-local previous = playerGui:FindFirstChild(GUI_NAME)
+local previous = playerGui:FindFirstChild(NAME)
 if previous then previous:Destroy() end
 
-local gui = Instance.new("ScreenGui")
-gui.Name = GUI_NAME
-gui.ResetOnSpawn = false
-gui.IgnoreGuiInset = true
-gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-gui.DisplayOrder = 90
-gui.Parent = playerGui
-
-local alive = true
-local connections = {}
-local function connect(signal, fn)
-    local c = signal:Connect(fn)
-    table.insert(connections, c)
-    return c
-end
-local function create(class, props, parent)
-    local object = Instance.new(class)
-    for key, value in pairs(props or {}) do object[key] = value end
-    object.Parent = parent
-    return object
-end
-local function rgb(r, g, b) return Color3.fromRGB(r, g, b) end
-local function round(object, radius)
-    return create("UICorner", {CornerRadius = UDim.new(0, radius)}, object)
-end
-local function stroke(object, color, thickness, trans)
-    return create("UIStroke", {
-        Color = color or rgb(255, 255, 255),
-        Thickness = thickness or 2,
-        Transparency = trans or 0,
-        ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    }, object)
-end
-local rainbowColors = ColorSequence.new({
-    ColorSequenceKeypoint.new(0.00, rgb(38, 182, 255)),
-    ColorSequenceKeypoint.new(0.16, rgb(121, 52, 255)),
-    ColorSequenceKeypoint.new(0.33, rgb(249, 50, 198)),
-    ColorSequenceKeypoint.new(0.49, rgb(255, 118, 45)),
-    ColorSequenceKeypoint.new(0.64, rgb(248, 239, 42)),
-    ColorSequenceKeypoint.new(0.80, rgb(56, 246, 116)),
-    ColorSequenceKeypoint.new(1.00, rgb(38, 182, 255))
-})
-local gradients = {}
-local function rainbow(object, rotation)
-    local g = create("UIGradient", {Color = rainbowColors, Rotation = rotation or 0}, object)
-    table.insert(gradients, g)
-    return g
-end
-local function tween(object, duration, props, easingStyle, easingDirection)
-    local info = TweenInfo.new(duration, easingStyle or Enum.EasingStyle.Quad,
-        easingDirection or Enum.EasingDirection.Out)
-    local t = TweenService:Create(object, info, props)
-    t:Play()
-    return t
-end
-local function textLabel(parent, value, size, position, dimensions, color, font, z)
-    return create("TextLabel", {
-        BackgroundTransparency = 1,
-        BorderSizePixel = 0,
-        Text = value,
-        Font = font or Enum.Font.FredokaOne,
-        TextSize = size,
-        TextColor3 = color or rgb(255, 255, 255),
-        TextStrokeColor3 = rgb(0, 0, 0),
-        TextStrokeTransparency = 0.4,
-        Position = position,
-        Size = dimensions,
-        TextXAlignment = Enum.TextXAlignment.Center,
-        TextYAlignment = Enum.TextYAlignment.Center,
-        ZIndex = z or 3
-    }, parent)
-end
-
--- Icon shapes: constructed from Roblox Frames, no external image asset needed.
-local function crown(parent, position, size, z)
-    local root = create("Frame", {
-        Position = position, Size = size, BackgroundTransparency = 1,
-        BorderSizePixel = 0, ZIndex = z or 5
-    }, parent)
-    local blocks = {
-        {0.07,0.10,0.19,0.33}, {0.41,0.00,0.18,0.45}, {0.74,0.10,0.19,0.33},
-        {0.07,0.36,0.86,0.24}, {0.13,0.60,0.74,0.13}, {0.13,0.78,0.74,0.17}
-    }
-    for _, p in ipairs(blocks) do
-        local block = create("Frame", {
-            Position = UDim2.fromScale(p[1], p[2]),
-            Size = UDim2.fromScale(p[3], p[4]),
-            BackgroundColor3 = rgb(255,255,255), BorderSizePixel = 0,
-            ZIndex = (z or 5) + 1
-        }, root)
-        rainbow(block, 20)
-        stroke(block, rgb(7,6,17), 1.4)
-    end
-    return root
-end
-local function sparkle(parent, position, size, z)
-    local root = create("Frame", {
-        Position = position, Size = size, BackgroundTransparency = 1, ZIndex = z or 5
-    }, parent)
-    local pieces = {
-        {0.29,0.28,0.44,0.44,45}, {0.05,0.02,0.18,0.18,45},
-        {0.75,0.04,0.14,0.14,45}, {0.75,0.75,0.16,0.16,45}
-    }
-    for _, p in ipairs(pieces) do
-        local piece = create("Frame", {
-            Position = UDim2.fromScale(p[1], p[2]),
-            Size = UDim2.fromScale(p[3], p[4]),
-            Rotation = p[5], BackgroundColor3 = rgb(255,255,255),
-            BorderSizePixel = 0, ZIndex = (z or 5) + 1
-        }, root)
-        rainbow(piece, 40)
-    end
-    return root
-end
-local function traitIcon(parent, kind, position, size, z)
-    if kind == "crown" then return crown(parent, position, size, z) end
-    return sparkle(parent, position, size, z)
-end
-
--- Main window (same approximate dimensions and visual hierarchy as the clip).
-local panel = create("Frame", {
-    Name = "TraitSpawnerPanel",
-    AnchorPoint = Vector2.new(0.5, 0.5),
-    Position = UDim2.fromScale(0.515, 0.59),
-    Size = UDim2.fromOffset(530, 575),
-    BackgroundColor3 = rgb(9, 9, 13),
-    BorderSizePixel = 0,
-    Active = true, ZIndex = 1
-}, gui)
-round(panel, 11)
-local panelStroke = stroke(panel, rgb(255,255,255), 3)
-rainbow(panelStroke, 0)
-local responsiveScale = create("UIScale", {Scale = 1}, panel)
-
-local function resize()
-    if not gui.Parent then return end
-    local camera = workspace.CurrentCamera
-    if not camera then return end
-    local v = camera.ViewportSize
-    responsiveScale.Scale = math.clamp(math.min((v.X - 16) / 560, (v.Y - 22) / 600), 0.43, 1)
-end
-resize()
-local camera = workspace.CurrentCamera
-if camera then connect(camera:GetPropertyChangedSignal("ViewportSize"), resize) end
-connect(workspace:GetPropertyChangedSignal("CurrentCamera"), function()
-    camera = workspace.CurrentCamera
-    if camera then
-        connect(camera:GetPropertyChangedSignal("ViewportSize"), resize)
-        resize()
-    end
-end)
-
-local header = create("Frame", {
-    Name = "Header", Position = UDim2.fromOffset(4,4), Size = UDim2.new(1,-8,0,48),
-    BackgroundColor3 = rgb(30,27,33), BorderSizePixel = 0, Active = true, ZIndex = 2
-}, panel)
-round(header, 8)
-local headerTitle = textLabel(header, "Trait Spawner", 18,
-    UDim2.fromOffset(15, 5), UDim2.new(1,-90,0,36), rgb(255,255,255), Enum.Font.FredokaOne, 4)
-headerTitle.TextXAlignment = Enum.TextXAlignment.Left
-
-local closeButton = create("TextButton", {
-    Name = "Close", Position = UDim2.new(1,-46,0,3), Size = UDim2.fromOffset(41,41),
-    BackgroundColor3 = rgb(229,43,65), Text = "X", TextSize = 23,
-    TextColor3 = rgb(255,255,255), TextStrokeTransparency = 0.18,
-    TextStrokeColor3 = rgb(0,0,0), Font = Enum.Font.FredokaOne,
-    AutoButtonColor = false, BorderSizePixel = 0, ZIndex = 7
-}, header)
-round(closeButton, 10)
-stroke(closeButton, rgb(255,255,255), 2.5)
-
--- Scroll list / data from the user's previously requested traits.
-local scroll = create("ScrollingFrame", {
-    Name = "TraitList", Position = UDim2.fromOffset(13,59),
-    Size = UDim2.new(1,-26,1,-150),
-    BackgroundTransparency = 1, BorderSizePixel = 0,
-    ScrollBarThickness = 5, ScrollBarImageColor3 = rgb(201,180,224),
-    ScrollBarImageTransparency = .15,
-    CanvasSize = UDim2.fromOffset(0,0),
-    AutomaticCanvasSize = Enum.AutomaticSize.Y,
-    ScrollingDirection = Enum.ScrollingDirection.Y,
-    ClipsDescendants = true, ZIndex = 2
-}, panel)
-create("UIListLayout", {
-    SortOrder = Enum.SortOrder.LayoutOrder,
-    Padding = UDim.new(0,7)
-}, scroll)
-create("UIPadding", {PaddingBottom = UDim.new(0,8)}, scroll)
-
--- Traits not shown clearly in the clip retain placeholder descriptions,
--- while Golden and Unique reproduce the visible bonuses exactly.
-local traits = {
-    {name="Superior", chance="25%", icon="sparkle", info="<font color='#FF6262'>+10% Damage</font>"},
-    {name="Range", chance="18%", icon="sparkle", info="<font color='#FFE88A'>+10% Range</font>"},
-    {name="Nimble", chance="12%", icon="sparkle", info="<font color='#9FDDFF'>-10% Cooldown</font>"},
-    {name="Godspeed", chance="1%", icon="sparkle", info="<font color='#9FDDFF'>-20% Cooldown</font>"},
-    {name="Celestial", chance="0.36%", icon="sparkle", info="<font color='#FFE88A'>Rare trait  •  0.36% chance</font>"},
-    {name="Divine", chance="0.2%", icon="sparkle", info="<font color='#FF6464'>+20% Damage</font>, <font color='#FFF08E'>+20% Range</font>\n<font color='#9EDBFF'>-10% Cooldown</font>"},
-    {name="Golden", chance="0.15%", icon="sparkle", info="<font color='#FF6060'>+30% Damage</font>\n<font color='#FFE77B'>+10% Kill Money, +20% Farm Money</font>"},
-    {name="Unique", chance="0.1%", icon="crown", info="<font color='#FF6666'>+300% Damage</font>, <font color='#FFE77B'>+10% Range</font>\n<font color='#9FDFFF'>-10% Cooldown</font>\n<font color='#FFE77B'>Max 1 placed</font>"}
+local C = {
+    window = Color3.fromRGB(9, 9, 12),
+    panel = Color3.fromRGB(28, 27, 32),
+    dropdown = Color3.fromRGB(40, 39, 44),
+    border = Color3.fromRGB(76, 71, 81),
+    active = Color3.fromRGB(48, 45, 53),
+    orange = Color3.fromRGB(225, 154, 84),
+    text = Color3.fromRGB(228, 225, 231),
+    secondary = Color3.fromRGB(169, 164, 174),
+    dim = Color3.fromRGB(122, 118, 128),
 }
-local cards = {}
-local selected = #traits
-local busy = false
 
-local function cardShell(parent, height)
-    local f = create("Frame", {
-        Size = UDim2.new(1,-7,0,height),
-        BackgroundColor3 = rgb(16,11,24), BorderSizePixel = 0, ZIndex = 3
+local function new(class, props, parent)
+    local obj = Instance.new(class)
+    for k,v in pairs(props or {}) do obj[k] = v end
+    obj.Parent = parent
+    return obj
+end
+local function round(obj, radius)
+    return new("UICorner", {CornerRadius=UDim.new(0,radius or 5)}, obj)
+end
+local function stroke(obj, transparency)
+    return new("UIStroke", {Color=C.border, Transparency=transparency or .44, Thickness=1}, obj)
+end
+local function rect(parent,x,y,w,h,color,alpha,radius,withStroke,z)
+    local item = new("Frame", {
+        Position=UDim2.fromOffset(x,y), Size=UDim2.fromOffset(w,h),
+        BackgroundColor3=color or C.panel, BackgroundTransparency=alpha or 0,
+        BorderSizePixel=0, ZIndex=z or 2,
     }, parent)
-    round(f, 8)
-    local s = stroke(f, rgb(255,255,255), 2)
-    rainbow(s, 20)
+    if radius and radius > 0 then round(item,radius) end
+    if withStroke then stroke(item,withStroke == true and .42 or withStroke) end
+    return item
+end
+local function text(parent, str,x,y,w,h,opts)
+    opts=opts or {}
+    return new("TextLabel",{
+        Position=UDim2.fromOffset(x,y),Size=UDim2.fromOffset(w,h),
+        BackgroundTransparency=1, BorderSizePixel=0, Text=tostring(str),
+        Font=opts.font or Enum.Font.Gotham, TextSize=opts.size or 10,
+        TextColor3=opts.color or C.secondary,
+        TextXAlignment=opts.align or Enum.TextXAlignment.Left,
+        TextYAlignment=Enum.TextYAlignment.Center,
+        TextWrapped=opts.wrap or false,
+        TextTruncate=Enum.TextTruncate.AtEnd,
+        ZIndex=opts.z or 4,
+    },parent)
+end
+local function line(parent,x,y,w,z)
+    return rect(parent,x,y,w,1,C.border,.63,0,false,z or 3)
+end
+local function click(parent,label,x,y,w,h,fn,opts)
+    opts=opts or {}
+    local b=new("TextButton",{
+        Position=UDim2.fromOffset(x,y),Size=UDim2.fromOffset(w,h),
+        BackgroundColor3=opts.bg or C.active,
+        BackgroundTransparency=(opts.alpha~=nil) and opts.alpha or 1,
+        BorderSizePixel=0,AutoButtonColor=false,
+        Text=label or "", TextColor3=opts.color or C.secondary,
+        Font=Enum.Font.Gotham,TextSize=opts.size or 10,
+        TextXAlignment=opts.align or Enum.TextXAlignment.Left,
+        TextTruncate=Enum.TextTruncate.AtEnd,
+        ZIndex=opts.z or 5,
+    },parent)
+    if opts.radius then round(b,opts.radius) end
+    if fn then b.MouseButton1Click:Connect(fn) end
+    return b
+end
+local function animate(obj,properties)
+    if obj.Parent then
+        TweenService:Create(obj,TweenInfo.new(.14,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),properties):Play()
+    end
+end
+
+local gui=new("ScreenGui",{
+    Name=NAME, ResetOnSpawn=false, IgnoreGuiInset=true,
+    ZIndexBehavior=Enum.ZIndexBehavior.Sibling, DisplayOrder=10000,
+},playerGui)
+local window=rect(gui,0,0,WIDTH,HEIGHT,C.window,.18,6,.35,2)
+window.Name="Window"
+window.AnchorPoint=Vector2.new(.5,.5)
+window.Position=UDim2.fromScale(.5,.5)
+window.Active=true
+local scaler=new("UIScale",{Scale=1},window)
+
+local viewportConn
+local function updateScale()
+    local camera=workspace.CurrentCamera
+    if not camera then return end
+    local size=camera.ViewportSize
+    scaler.Scale=math.min(1,math.max(.35,math.min((size.X-18)/WIDTH,(size.Y-36)/HEIGHT)))
+end
+local function watchCamera()
+    if viewportConn then viewportConn:Disconnect(); viewportConn=nil end
+    local camera=workspace.CurrentCamera
+    if camera then
+        viewportConn=camera:GetPropertyChangedSignal("ViewportSize"):Connect(updateScale)
+    end
+    updateScale()
+end
+watchCamera()
+local cameraConn=workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(watchCamera)
+
+-- Floating launcher is shown only if red close dot is clicked.
+local launcher
+launcher=click(gui,"SP",16,0,40,32,function()
+    window.Visible=true
+    launcher.Visible=false
+end,{bg=C.window,alpha=.12,color=C.orange,size=13,radius=7,z=10})
+launcher.AnchorPoint=Vector2.new(0,.5)
+launcher.Position=UDim2.new(0,16,.5,0)
+launcher.Visible=false
+stroke(launcher,.4)
+
+-- Top bar and macOS-style dots.
+local bar=rect(window,0,0,WIDTH,24,C.window,1,0,false,3)
+bar.Active=true
+local dots={
+    {x=10,color=Color3.fromRGB(255,96,87)},
+    {x=22,color=Color3.fromRGB(255,188,46)},
+    {x=34,color=Color3.fromRGB(65,66,69)},
+}
+local dotButtons={}
+for i,d in ipairs(dots) do
+    local b=click(bar,"",d.x,8,8,8,nil,{bg=d.color,alpha=0,z=7,radius=8})
+    dotButtons[i]=b
+end
+
+local sidebar=rect(window,0,24,184,HEIGHT-24,C.window,1,0,false,3)
+rect(window,184,24,1,HEIGHT-24,C.border,.58,0,false,3)
+text(sidebar,"Silent Productions",14,9,155,18,{size=12,color=C.orange,font=Enum.Font.GothamMedium})
+text(sidebar,"Subscription: Lifetime",14,28,160,11,{size=8,color=C.dim})
+line(sidebar,14,56,160)
+
+local main=rect(window,185,24,WIDTH-185,HEIGHT-24,C.window,1,0,false,3)
+local heading=text(main,"Rollback",16,9,350,23,{size=10,color=C.secondary})
+line(main,14,35,357)
+local pageHost=rect(main,0,43,385,303,C.window,1,0,false,3)
+pageHost.ClipsDescendants=true
+
+local selected="Rollback"
+local tabs={"Macro","Lag","INF Range","Rollback"}
+local tabButtons={}
+local currentPage=nil
+local activePopup=nil
+local minimized=false
+local state={
+    rollback={method="Trait",tradeMethod="Units",universal=false,trade=false},
+    macro={record=false,play=false,equip=false,delay=.2,mode="Default",profile="Default"},
+    lag={enabled=false,intensity=30},
+    range={enabled=false,value=250},
+}
+
+local function closePopup()
+    if activePopup then activePopup:Destroy();activePopup=nil end
+end
+local toastSerial=0
+local toastBox=rect(window,147,322,275,29,C.dropdown,.05,5,.15,80)
+toastBox.Visible=false
+local toastLabel=text(toastBox,"",8,1,259,27,{size=10,color=C.text,align=Enum.TextXAlignment.Center,z=81})
+local function toast(message)
+    toastSerial=toastSerial+1
+    local this=toastSerial
+    toastLabel.Text=message
+    toastBox.Visible=true
+    task.delay(1.7,function()
+        if this==toastSerial and toastBox.Parent then toastBox.Visible=false end
+    end)
+end
+
+-- Dropdown popup is attached to the WINDOW, not the card, so it can overlay other controls.
+local function dropdown(parent,x,y,w,options,value,changed,prefix)
+    prefix=prefix or "Method"
+    local b=click(parent,"  "..prefix.." - "..tostring(value),x,y,w,28,nil,{
+        bg=C.dropdown,alpha=.07,color=C.secondary,size=10,radius=4,z=7
+    })
+    stroke(b,.72)
+    text(b,"⌄",w-19,1,15,26,{size=14,color=C.dim,align=Enum.TextXAlignment.Center,z=8})
+    b.MouseButton1Click:Connect(function()
+        if activePopup then closePopup() end
+        local px=(b.AbsolutePosition.X-window.AbsolutePosition.X)/scaler.Scale
+        local py=(b.AbsolutePosition.Y-window.AbsolutePosition.Y)/scaler.Scale+28+3
+        local popupH=#options*26+4
+        if py+popupH>HEIGHT-6 then py=py-popupH-34 end
+        local pop=rect(window,px,py,w,popupH,C.dropdown,.01,4,.15,90)
+        activePopup=pop
+        for i,opt in ipairs(options) do
+            local item=click(pop,"  "..opt,3,2+(i-1)*26,w-6,26,function()
+                b.Text="  "..prefix.." - "..opt
+                if changed then changed(opt) end
+                closePopup()
+            end,{bg=C.active,alpha=.45,color=C.text,size=10,z=91})
+            item.MouseEnter:Connect(function()item.BackgroundTransparency=.04 end)
+            item.MouseLeave:Connect(function()item.BackgroundTransparency=.45 end)
+        end
+    end)
+    return b
+end
+local function toggle(parent,label,x,y,value,changed)
+    text(parent,label,x,y,132,20,{size=9,color=C.secondary})
+    local bg=click(parent,"",x+137,y+2,29,16,nil,{bg=Color3.fromRGB(59,57,64),alpha=0,z=8,radius=12})
+    local knob=rect(bg,value and 16 or 3,3,10,10,value and C.text or Color3.fromRGB(151,147,155),0,10,false,9)
+    local on=value
+    local function set(v,signal)
+        on=v
+        animate(bg,{BackgroundColor3=on and Color3.fromRGB(100,97,106) or Color3.fromRGB(59,57,64)})
+        animate(knob,{Position=UDim2.fromOffset(on and 16 or 3,3),BackgroundColor3=on and C.text or Color3.fromRGB(151,147,155)})
+        if signal and changed then changed(on) end
+    end
+    bg.MouseButton1Click:Connect(function()set(not on,true)end)
+    return set
+end
+local function action(parent,label,x,y,w,fn)
+    local b=click(parent,label,x,y,w,29,fn,{alpha=1,color=C.secondary,size=10,z=7})
+    text(b,"›",w-15,0,14,29,{size=17,color=C.secondary,align=Enum.TextXAlignment.Right,z=8})
+    return b
+end
+local function card(parent,x,y,w,h,title)
+    local f=rect(parent,x,y,w,h,C.panel,.39,5,.53,4)
+    text(f,title,12,10,w-24,22,{size=11,color=C.text,font=Enum.Font.GothamMedium,z=6})
+    line(f,12,42,w-24,6)
     return f
 end
+local function page(canvasHeight)
+    closePopup()
+    if currentPage then currentPage:Destroy() end
+    local p=new("ScrollingFrame",{
+        Size=UDim2.new(1,0,1,0),Position=UDim2.fromOffset(0,0),
+        BackgroundTransparency=1,BorderSizePixel=0,
+        ScrollBarThickness=3,ScrollBarImageColor3=C.dim,
+        ScrollingDirection=Enum.ScrollingDirection.Y,
+        CanvasSize=UDim2.fromOffset(0,canvasHeight or 301),
+        ClipsDescendants=true,ZIndex=3,
+    },pageHost)
+    currentPage=p
+    return p
+end
 
-for i, t in ipairs(traits) do
-    local holder = create("Frame", {
-        Name = "Trait_" .. t.name,
-        Size = UDim2.new(1,0,0,122),
-        BackgroundTransparency = 1,
-        LayoutOrder = i,
-        ZIndex = 3
-    }, scroll)
+local function showRollback()
+    local p=page(302)
+    local a=card(p,10,1,176,174,"Universal Rollback")
+    dropdown(a,12,53,152,{"Trait","Units"},state.rollback.method,function(choice)
+        state.rollback.method=choice
+    end)
+    toggle(a,"Activate Universal Rollback",12,95,state.rollback.universal,function(on)
+        state.rollback.universal=on
+    end)
+    action(a,"Confirm Rollback",12,123,152,function()
+        toast("Confirm Rollback pressed")
+    end)
+    local b=card(p,195,1,177,131,"Trade Rollback")
+    dropdown(b,12,53,153,{"Units","Trait"},state.rollback.tradeMethod,function(choice)
+        state.rollback.tradeMethod=choice
+    end)
+    toggle(b,"Activate Trade Rollback",12,95,state.rollback.trade,function(on)
+        state.rollback.trade=on
+    end)
+end
 
-    local button = create("TextButton", {
-        Name = "Select_" .. t.name,
-        Text = "", AutoButtonColor = false,
-        Position = UDim2.fromOffset(0,0),
-        Size = UDim2.new(1,-7,0,51),
-        BackgroundColor3 = rgb(30,21,42), BorderSizePixel = 0,
-        ZIndex = 4
-    }, holder)
-    round(button, 10)
-    local edge = stroke(button, rgb(255,255,255), 2.8)
-    rainbow(edge, 20)
-    traitIcon(button, t.icon, UDim2.fromOffset(8,6), UDim2.fromOffset(39,37), 6)
-
-    local name = textLabel(button, t.name, 23, UDim2.fromOffset(65,7),
-        UDim2.new(1,-170,0,36), rgb(255,95,215), Enum.Font.FredokaOne, 6)
-    rainbow(name, 30)
-    local chance = textLabel(button, t.chance, 16, UDim2.new(1,-90,0,9),
-        UDim2.fromOffset(77,32), rgb(255,176,200), Enum.Font.FredokaOne, 6)
-    chance.TextXAlignment = Enum.TextXAlignment.Right
-    rainbow(chance, 15)
-
-    local description = cardShell(holder, 66)
-    description.Position = UDim2.fromOffset(8,55)
-    description.Size = UDim2.new(1,-23,0,66)
-    local descText = textLabel(description, t.info, 14, UDim2.fromOffset(9,2),
-        UDim2.new(1,-18,1,-4), rgb(255,255,255), Enum.Font.FredokaOne, 5)
-    descText.RichText = true
-    descText.TextWrapped = true
-    descText.TextStrokeTransparency = .2
-    cards[i] = {button = button, holder = holder}
-    connect(button.MouseEnter, function()
-        if not busy and selected ~= i then
-            tween(button,.14,{BackgroundColor3=rgb(51,32,67)})
+local function slider(parent,x,y,w,minValue,maxValue,value,changed)
+    local track=rect(parent,x,y+8,w,3,Color3.fromRGB(77,75,83),0,2,false,7)
+    local fill=rect(track,0,0,0,3,C.secondary,0,2,false,8)
+    local dot=rect(parent,x-5,y+4,11,11,C.text,0,10,false,9)
+    local hit=click(parent,"",x-7,y,w+14,21,nil,{alpha=1,z=10})
+    local pressed=false
+    local touch=nil
+    local function update(num)
+        local f=math.clamp((num-minValue)/(maxValue-minValue),0,1)
+        fill.Size=UDim2.new(f,0,1,0)
+        dot.Position=UDim2.fromOffset(x+f*w-5,y+4)
+        if changed then changed(minValue+f*(maxValue-minValue)) end
+    end
+    local function inputMove(input)
+        local f=(input.Position.X-(hit.AbsolutePosition.X+7*scaler.Scale))/(w*scaler.Scale)
+        update(minValue+math.clamp(f,0,1)*(maxValue-minValue))
+    end
+    hit.InputBegan:Connect(function(input)
+        if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then
+            pressed=true
+            touch=(input.UserInputType==Enum.UserInputType.Touch) and input or nil
+            inputMove(input)
         end
     end)
-    connect(button.MouseLeave, function()
-        if not busy and selected ~= i then
-            tween(button,.14,{BackgroundColor3=rgb(30,21,42)})
+    local moved=UIS.InputChanged:Connect(function(input)
+        if pressed and ((touch and input==touch) or (not touch and input.UserInputType==Enum.UserInputType.MouseMovement)) then
+            inputMove(input)
         end
     end)
-end
-
-local footer = create("Frame", {
-    Name = "Footer", Position = UDim2.new(0,12,1,-78),
-    Size = UDim2.new(1,-24,0,68),
-    BackgroundColor3 = rgb(29,27,32), BorderSizePixel = 0, ZIndex = 5
-}, panel)
-round(footer, 10)
-stroke(footer, rgb(83,81,89), 1.6)
-local footerIcon = create("Frame", {
-    Name = "SelectedIcon", Position = UDim2.fromOffset(11,13),
-    Size = UDim2.fromOffset(39,40), BackgroundTransparency = 1, ZIndex = 6
-},footer)
-local footerName = textLabel(footer, "Unique", 17,
-    UDim2.fromOffset(54,7), UDim2.fromOffset(205,28), rgb(255,255,255),
-    Enum.Font.FredokaOne, 7)
-footerName.TextXAlignment = Enum.TextXAlignment.Left
-rainbow(footerName,0)
-local footerChance = textLabel(footer, "0.1% chance", 13,
-    UDim2.fromOffset(54,34), UDim2.fromOffset(195,24), rgb(175,170,181),
-    Enum.Font.GothamMedium, 7)
-footerChance.TextXAlignment = Enum.TextXAlignment.Left
-footerChance.TextStrokeTransparency = .85
-
-local apply = create("TextButton", {
-    Name = "Apply", Position = UDim2.new(1,-157,0,10),
-    Size = UDim2.fromOffset(145,49),
-    BackgroundColor3 = rgb(64,226,102), BorderSizePixel = 0,
-    Text = "APPLY", TextSize = 20, Font = Enum.Font.FredokaOne,
-    TextStrokeTransparency = .03, TextStrokeColor3 = rgb(5,25,7),
-    TextColor3 = rgb(218,255,231), AutoButtonColor = false, ZIndex = 7
-}, footer)
-round(apply, 12)
-stroke(apply, rgb(31,119,53), 2.5)
-create("UIGradient", {Color=ColorSequence.new(rgb(91,255,139),rgb(17,146,59)),Rotation=90},apply)
-local applyScale = create("UIScale",{Scale=1},apply)
-connect(apply.MouseEnter,function() if not busy then tween(applyScale,.16,{Scale=1.035}) end end)
-connect(apply.MouseLeave,function() if not busy then tween(applyScale,.16,{Scale=1}) end end)
-connect(apply.MouseButton1Down,function() if not busy then tween(applyScale,.09,{Scale=.96}) end end)
-connect(apply.MouseButton1Up,function() if not busy then tween(applyScale,.13,{Scale=1.03}) end end)
-
-local function updateSelected()
-    for i, item in ipairs(cards) do
-        tween(item.button,.15,{BackgroundColor3 = (i == selected) and rgb(81,67,94) or rgb(30,21,42)})
-    end
-    footerName.Text = traits[selected].name
-    footerChance.Text = traits[selected].chance .. " chance"
-    footerIcon:ClearAllChildren()
-    traitIcon(footerIcon, traits[selected].icon, UDim2.fromScale(0,0),UDim2.fromScale(1,1),8)
-end
-for i, item in ipairs(cards) do
-    connect(item.button.MouseButton1Click, function()
-        if busy then return end
-        selected = i
-        updateSelected()
+    local ended=UIS.InputEnded:Connect(function(input)
+        if pressed and ((touch and input==touch) or (not touch and input.UserInputType==Enum.UserInputType.MouseButton1)) then
+            pressed=false; touch=nil
+        end
     end)
-end
-updateSelected()
-
--- Reference video initially shows Golden and Unique toward bottom of list.
-task.defer(function()
-    task.wait(.18)
-    if scroll.Parent then
-        scroll.CanvasPosition = Vector2.new(0,
-            math.max(0, scroll.AbsoluteCanvasSize.Y - scroll.AbsoluteWindowSize.Y))
-    end
-end)
-
--- Dim overlay shown while applying (visible within the panel).
-local overlay = create("Frame", {
-    Name = "Darkening", Size = UDim2.fromScale(1,1),
-    BackgroundColor3 = rgb(0,0,0), BackgroundTransparency = .48,
-    BorderSizePixel = 0, Visible = false, Active = true, ZIndex = 20
-}, panel)
-round(overlay,11)
-
-local loading = create("Frame", {
-    Name = "LoadingPopup", AnchorPoint = Vector2.new(.5,.5),
-    Position = UDim2.fromScale(.5,.5), Size = UDim2.fromOffset(350,158),
-    BackgroundColor3 = rgb(12,12,16), BorderSizePixel = 0, ZIndex = 22,
-    Visible = false
-}, overlay)
-round(loading, 15)
-local loadEdge = stroke(loading, rgb(255,255,255), 3.5)
-rainbow(loadEdge, 0)
-local loadScale = create("UIScale",{Scale=.88}, loading)
-local loadingTitle = textLabel(loading, "Applying Unique...",19,
-    UDim2.fromOffset(14,11), UDim2.new(1,-28,0,43), rgb(255,255,255),Enum.Font.FredokaOne, 24)
-rainbow(loadingTitle, 0)
-local progressTrack = create("Frame", {
-    Name = "ProgressTrack", Position = UDim2.fromOffset(25,70),
-    Size = UDim2.new(1,-50,0,24), BackgroundColor3 = rgb(18,18,23),
-    BorderSizePixel = 0, ClipsDescendants = true, ZIndex = 24
-},loading)
-round(progressTrack,8)
-stroke(progressTrack,rgb(91,91,98),2)
-local progressFill = create("Frame", {
-    Name = "RainbowFill", Size = UDim2.fromScale(0,1),
-    BackgroundColor3 = rgb(255,255,255), BorderSizePixel = 0, ZIndex = 25
-},progressTrack)
-round(progressFill,7)
-local fillGradient = rainbow(progressFill,0)
-local progressText = textLabel(loading,"0%",17,
-    UDim2.fromOffset(15,105),UDim2.new(1,-30,0,36),rgb(255,255,255),Enum.Font.FredokaOne,25)
-progressText.TextStrokeTransparency = .4
-
--- Video's success animation: rainbow rim, big crown, "TRAIT APPLIED", Unique.
-local success = create("Frame", {
-    Name = "SuccessPopup", AnchorPoint = Vector2.new(.5,.5),
-    Position = UDim2.fromScale(.5,.5), Size = UDim2.fromOffset(330,215),
-    BackgroundColor3 = rgb(12,12,16), BorderSizePixel = 0,
-    Visible = false, ZIndex = 30
-}, overlay)
-round(success,16)
-local successEdge=stroke(success,rgb(255,255,255),3.5)
-rainbow(successEdge,35)
-local successScale=create("UIScale",{Scale=.52},success)
-local appliedTitle=textLabel(success,"TRAIT APPLIED",16,
-    UDim2.fromOffset(12,12),UDim2.new(1,-24,0,29),rgb(196,193,206),Enum.Font.GothamBold,32)
-appliedTitle.TextStrokeTransparency = .9
-local successIconHolder=create("Frame",{
-    Position=UDim2.new(.5,-42,0,51),Size=UDim2.fromOffset(84,76),
-    BackgroundTransparency=1,ZIndex=32
-},success)
-local outcomeIcon = traitIcon(successIconHolder, "crown", UDim2.fromScale(0,0),UDim2.fromScale(1,1),33)
-local outcomeText=textLabel(success,"Unique",28,
-    UDim2.fromOffset(16,143),UDim2.new(1,-32,0,49),rgb(79,255,148),Enum.Font.FredokaOne,33)
-rainbow(outcomeText,75)
-
-local function clearOutcomeIcon(kind)
-    successIconHolder:ClearAllChildren()
-    outcomeIcon = traitIcon(successIconHolder, kind,UDim2.fromScale(0,0),UDim2.fromScale(1,1),33)
+    hit.Destroying:Connect(function()moved:Disconnect();ended:Disconnect()end)
+    update(value)
 end
 
-local activeCycle = 0
-local function doApply()
-    if busy or not alive then return end
-    busy = true
-    activeCycle = activeCycle + 1
-    local cycle = activeCycle
-    local t = traits[selected]
-    apply.Text = "LOADING..."
-    tween(applyScale,.1,{Scale=1})
-    overlay.Visible = true
-    loading.Visible = true
-    success.Visible = false
-    loadingTitle.Text = "Applying " .. t.name .. "..."
-    progressText.Text = "0%"
-    progressFill.Size = UDim2.fromScale(0,1)
-    loadScale.Scale = .85
-    tween(loadScale,.25,{Scale=1},Enum.EasingStyle.Back)
-
-    local start = os.clock()
-    while alive and gui.Parent and cycle == activeCycle do
-        local percent = math.clamp((os.clock()-start)/LOAD_DURATION,0,1)
-        progressFill.Size = UDim2.fromScale(percent,1)
-        progressText.Text = tostring(math.floor(percent*100)) .. "%"
-        if percent >= 1 then break end
-        RunService.Heartbeat:Wait()
-    end
-    if not alive or not gui.Parent or cycle ~= activeCycle then return end
-    progressFill.Size = UDim2.fromScale(1,1)
-    progressText.Text = "100%"
-    task.wait(.15)
-    if not alive or not gui.Parent then return end
-    loading.Visible = false
-    success.Visible = true
-    clearOutcomeIcon(t.icon)
-    outcomeText.Text = t.name
-    successScale.Scale = .5
-    tween(successScale,.46,{Scale=1},Enum.EasingStyle.Back,Enum.EasingDirection.Out)
-    task.wait(RESULT_DURATION)
-    if not alive or not gui.Parent then return end
-    tween(successScale,.38,{Scale=.12},Enum.EasingStyle.Back,Enum.EasingDirection.In)
-    task.wait(.4)
-    if not alive or not gui.Parent then return end
-    success.Visible = false
-    overlay.Visible = false
-    apply.Text = "APPLY"
-    busy = false
+local function showMacro()
+    local p=page(411)
+    local left=card(p,10,1,176,257,"Macro Status")
+    local status=text(left,"Status: Stopped",12,56,152,22,{size=10,color=C.text})
+    text(left,"Action:",12,99,154,19,{size=10})
+    text(left,"Type:",12,140,154,19,{size=10})
+    text(left,"Unit:",12,181,154,19,{size=10})
+    text(left,"Waiting for:",12,222,154,19,{size=10})
+    local right=card(p,195,1,177,346,"Macro")
+    local setRecord,setPlay
+    setRecord=toggle(right,"Record Macro",9,53,state.macro.record,function(on)
+        state.macro.record=on
+        if on and setPlay then state.macro.play=false;setPlay(false,false) end
+        status.Text=on and "Status: Recording" or "Status: Stopped"
+    end)
+    setPlay=toggle(right,"Play Macro",9,86,state.macro.play,function(on)
+        state.macro.play=on
+        if on and setRecord then state.macro.record=false;setRecord(false,false) end
+        status.Text=on and "Status: Playing" or "Status: Stopped"
+    end)
+    toggle(right,"Auto Equip Macro Units",9,119,state.macro.equip,function(on)state.macro.equip=on end)
+    text(right,"Step Delay",9,155,77,18,{size=9})
+    local val=text(right,string.format("%.1f",state.macro.delay),145,155,22,18,{size=9,align=Enum.TextXAlignment.Right})
+    slider(right,88,154,51,.1,1,state.macro.delay,function(n)
+        state.macro.delay=math.floor(n*10+.5)/10
+        val.Text=string.format("%.1f",state.macro.delay)
+    end)
+    dropdown(right,9,187,159,{"Default","Story","Infinite","Challenge"},state.macro.mode,function(choice)
+        state.macro.mode=choice
+    end,"Modes")
+    dropdown(right,9,220,159,{"Default","Profile 1","Profile 2"},state.macro.profile,function(choice)
+        state.macro.profile=choice
+    end,"Macro Profiles")
+    action(right,"New macro profile",9,259,159,function()toast("New macro profile pressed")end)
+    action(right,"Create new macro",9,297,159,function()toast("Create new macro pressed")end)
+    action(p,"Delete selected macro",10,361,176,function()toast("Delete selected macro pressed")end)
 end
-connect(apply.MouseButton1Click,function() task.spawn(doApply) end)
-
-local function shutdown()
-    if not alive then return end
-    alive = false
-    activeCycle = activeCycle + 1
-    for _, conn in ipairs(connections) do conn:Disconnect() end
-    if gui.Parent then gui:Destroy() end
+local function showLag()
+    local p=page(302)
+    local a=card(p,10,1,176,186,"Lag")
+    toggle(a,"Enable Lag",10,54,state.lag.enabled,function(on)state.lag.enabled=on end)
+    text(a,"Intensity",10,98,65,19,{size=9})
+    local number=text(a,tostring(state.lag.intensity).."%",134,98,31,19,{size=9,align=Enum.TextXAlignment.Right})
+    slider(a,77,98,51,0,100,state.lag.intensity,function(n)
+        state.lag.intensity=math.floor(n+.5)
+        number.Text=state.lag.intensity.."%"
+    end)
+    local b=card(p,195,1,177,103,"Settings")
+    text(b,"Appearance controls",12,52,151,30,{size=10,color=C.dim})
 end
-connect(closeButton.MouseButton1Click,shutdown)
+local function showRange()
+    local p=page(302)
+    local a=card(p,10,1,176,186,"INF Range")
+    toggle(a,"Enable INF Range",10,54,state.range.enabled,function(on)state.range.enabled=on end)
+    text(a,"Range",10,98,65,19,{size=9})
+    local number=text(a,tostring(state.range.value),134,98,31,19,{size=9,align=Enum.TextXAlignment.Right})
+    slider(a,77,98,51,0,500,state.range.value,function(n)
+        state.range.value=math.floor(n+.5)
+        number.Text=tostring(state.range.value)
+    end)
+    local b=card(p,195,1,177,103,"Settings")
+    text(b,"Appearance controls",12,52,151,30,{size=10,color=C.dim})
+end
 
--- Drag anywhere on the title bar, works with touch and mouse; X remains clickable.
-local dragging = false
-local dragInput, dragOrigin, panelOrigin
-connect(header.InputBegan,function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or
-       input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragInput = input
-        dragOrigin = input.Position
-        panelOrigin = panel.Position
+local render={Macro=showMacro,Lag=showLag,["INF Range"]=showRange,Rollback=showRollback}
+local function openTab(name)
+    selected=name
+    heading.Text=name
+    for tab,btn in pairs(tabButtons) do
+        local chosen=(tab==name)
+        animate(btn,{BackgroundTransparency=chosen and .15 or 1})
+        btn.TextColor3=chosen and C.text or C.secondary
+    end
+    render[name]()
+end
+for i,name in ipairs(tabs) do
+    local b=click(sidebar,"  "..name,14,75+(i-1)*39,160,33,function()
+        openTab(name)
+    end,{bg=C.active,alpha=1,color=C.secondary,size=10,radius=4,z=5})
+    tabButtons[name]=b
+end
+line(sidebar,14,246,160)
+
+local function minimize(value)
+    minimized=value
+    closePopup()
+    toastBox.Visible=false
+    sidebar.Visible=not value
+    main.Visible=not value
+    window.Size=UDim2.fromOffset(WIDTH,value and 24 or HEIGHT)
+end
+dotButtons[1].MouseButton1Click:Connect(function()
+    window.Visible=false
+    launcher.Visible=true
+    closePopup()
+end)
+dotButtons[2].MouseButton1Click:Connect(function()minimize(not minimized)end)
+dotButtons[3].MouseButton1Click:Connect(function()minimize(false)end)
+
+-- Drag by the top bar, mouse or touch. Frame remains a floating overlay in game.
+local dragging=false
+local dragTouch=nil
+local dragStart=nil
+local startPosition=nil
+bar.InputBegan:Connect(function(input)
+    if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then
+        dragging=true
+        dragStart=input.Position
+        startPosition=window.Position
+        dragTouch=(input.UserInputType==Enum.UserInputType.Touch) and input or nil
+        closePopup()
     end
 end)
-connect(UserInput.InputChanged,function(input)
-    if not dragging or not dragOrigin then return end
-    if input.UserInputType == Enum.UserInputType.MouseMovement or
-       (dragInput and input == dragInput) then
-        local movement = input.Position - dragOrigin
-        local s = responsiveScale.Scale
-        panel.Position = UDim2.new(panelOrigin.X.Scale, panelOrigin.X.Offset+movement.X,
-            panelOrigin.Y.Scale, panelOrigin.Y.Offset+movement.Y)
+local dragMoved=UIS.InputChanged:Connect(function(input)
+    if not dragging then return end
+    if not ((dragTouch and input==dragTouch) or (not dragTouch and input.UserInputType==Enum.UserInputType.MouseMovement)) then return end
+    local delta=input.Position-dragStart
+    local camera=workspace.CurrentCamera
+    local viewport=camera and camera.ViewportSize or Vector2.new(1280,720)
+    local x=startPosition.X.Scale*viewport.X+startPosition.X.Offset+delta.X
+    local y=startPosition.Y.Scale*viewport.Y+startPosition.Y.Offset+delta.Y
+    local sw=WIDTH*scaler.Scale
+    local sh=(minimized and 24 or HEIGHT)*scaler.Scale
+    x=math.clamp(x,sw/2+3,math.max(sw/2+3,viewport.X-sw/2-3))
+    y=math.clamp(y,sh/2+3,math.max(sh/2+3,viewport.Y-sh/2-3))
+    window.Position=UDim2.fromOffset(x,y)
+end)
+local dragEnded=UIS.InputEnded:Connect(function(input)
+    if (dragTouch and input==dragTouch) or (not dragTouch and input.UserInputType==Enum.UserInputType.MouseButton1) then
+        dragging=false
+        dragTouch=nil
     end
 end)
-connect(UserInput.InputEnded,function(input)
-    if input == dragInput or input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = false
-        dragInput = nil
+local keyboardConn=UIS.InputBegan:Connect(function(input,handled)
+    if not handled and input.KeyCode==Enum.KeyCode.RightShift then
+        if launcher.Visible then
+            launcher.Visible=false
+            window.Visible=true
+        else
+            window.Visible=not window.Visible
+        end
+        closePopup()
     end
 end)
 
--- Entire rainbow effect rotates constantly; subtle diamond particles float behind UI.
-local elapsed = 0
-connect(RunService.RenderStepped,function(dt)
-    if not alive then return end
-    elapsed = elapsed + dt
-    local angle = (elapsed * 38) % 360
-    for _,g in ipairs(gradients) do
-        if g.Parent then g.Rotation = angle end
-    end
-    fillGradient.Offset = Vector2.new(math.sin(elapsed*1.7)*.38,0)
+gui.Destroying:Connect(function()
+    dragMoved:Disconnect()
+    dragEnded:Disconnect()
+    keyboardConn:Disconnect()
+    cameraConn:Disconnect()
+    if viewportConn then viewportConn:Disconnect() end
 end)
-
-local particleArea = create("Frame", {
-    Name="AmbientParticles", Position=UDim2.fromOffset(6,53),
-    Size=UDim2.new(1,-12,1,-110), BackgroundTransparency=1,
-    BorderSizePixel=0, ClipsDescendants=true, ZIndex=2
-},panel)
--- Non-interactive particles do not block clicking cards.
-task.spawn(function()
-    while alive and gui.Parent do
-        task.wait(.43)
-        if not alive or not gui.Parent then break end
-        local side = math.random(16,95)/100
-        local diamond = create("Frame",{
-            Position=UDim2.fromScale(side,1.03),
-            Size=UDim2.fromOffset(math.random(4,8),math.random(4,8)),
-            Rotation=45, BackgroundColor3=Color3.fromHSV(math.random(),.7,1),
-            BackgroundTransparency=.42,BorderSizePixel=0,ZIndex=2
-        },particleArea)
-        tween(diamond,2.3,{Position=UDim2.fromScale(side,math.random(5,60)/100),
-            BackgroundTransparency=1},Enum.EasingStyle.Linear)
-        task.delay(2.4,function() if diamond.Parent then diamond:Destroy() end end)
-    end
-end)
+openTab("Rollback")
